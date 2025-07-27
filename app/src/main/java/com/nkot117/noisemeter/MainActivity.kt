@@ -15,7 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import com.nkot117.noisemeter.ui.noise.NoiseMeterScreen
 import com.nkot117.noisemeter.ui.theme.NoiseMeterTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -26,18 +28,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // パーミッションの要求
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_DENIED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_DENIED
+        ) {
             requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
 
         enableEdgeToEdge()
         setContent {
             NoiseMeterTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NoiseMeterScreen(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                NoiseMeterScreen()
             }
         }
     }
