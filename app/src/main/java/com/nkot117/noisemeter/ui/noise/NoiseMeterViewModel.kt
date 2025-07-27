@@ -10,13 +10,20 @@ class NoiseMeterViewModel : ViewModel() {
     val uiState: StateFlow<NoiseUiState> = _uiState.asStateFlow()
 
     fun startRecording() {
-        _uiState.value = NoiseUiState.Loading
-
+        _uiState.value = NoiseUiState.isRecording
         try {
-            _uiState.value = NoiseUiState.Success(dbLevel = 0F)
+            // TODO: AudioRecordを使用した録音機能
         } catch (e: Exception) {
             _uiState.value = NoiseUiState.Error(message = "Error")
         }
     }
 
+    fun stopRecording() {
+        _uiState.value = NoiseUiState.Initial
+        try {
+            // TODO: AudioRecordのリリースタスク
+        } catch (e: Exception) {
+            _uiState.value = NoiseUiState.Error(message = "Error")
+        }
+    }
 }
