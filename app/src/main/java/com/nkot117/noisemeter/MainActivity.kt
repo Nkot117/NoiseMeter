@@ -23,7 +23,6 @@ class MainActivity : ComponentActivity() {
                 Manifest.permission.RECORD_AUDIO
             ) == PackageManager.PERMISSION_DENIED
         ) {
-            requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
 
         enableEdgeToEdge()
