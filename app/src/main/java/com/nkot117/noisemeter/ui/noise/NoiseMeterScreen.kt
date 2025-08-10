@@ -1,10 +1,6 @@
 package com.nkot117.noisemeter.ui.noise
 
 import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,19 +32,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun NoiseMeterScreen(
     viewModel: NoiseMeterViewModel = hiltViewModel(),
 ) {
+    Timber.d("NoiseMeterScreen Compose");
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold { innerPadding ->
