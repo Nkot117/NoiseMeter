@@ -1,5 +1,10 @@
 package com.nkot117.noisemeter.ui.noise
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,10 +36,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun NoiseMeterScreen(
     viewModel: NoiseMeterViewModel = hiltViewModel(),
@@ -43,15 +53,17 @@ fun NoiseMeterScreen(
 
     Scaffold { innerPadding ->
         NoiseMeterContent(
-            modifier = Modifier.padding((innerPadding))
+            modifier = Modifier.padding((innerPadding)),
         )
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun NoiseMeterContent(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
+    val audioPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -111,7 +123,13 @@ fun NoiseMeterContent(
             modifier = Modifier
                 .height(48.dp)
                 .width(500.dp),
-            onClick = {},
+            onClick = {
+                if (audioPermissionState.status === PermissionStatus.Granted) {
+                    // TODO 音量取得処理を実行
+                } else {
+                    audioPermissionState.launchPermissionRequest()
+                }
+            },
         ) {
             Icon(
                 imageVector = Icons.Default.PlayArrow,
