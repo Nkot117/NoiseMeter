@@ -17,14 +17,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // パーミッションの要求
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.RECORD_AUDIO
-            ) == PackageManager.PERMISSION_DENIED
-        ) {
-        }
-
         enableEdgeToEdge()
         setContent {
             NoiseMeterTheme {
