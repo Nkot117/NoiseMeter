@@ -100,6 +100,7 @@ fun NoiseMeterContent(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .padding(vertical = 20.dp)
             .verticalScroll(scrollState)
     ) {
         Card(
@@ -382,7 +383,6 @@ fun NoiseMeterContent(
                 }
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
