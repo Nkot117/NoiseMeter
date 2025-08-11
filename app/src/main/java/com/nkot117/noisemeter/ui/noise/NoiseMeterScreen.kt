@@ -22,7 +22,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -44,7 +46,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -53,6 +57,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
+import com.nkot117.noisemeter.R
 import com.nkot117.noisemeter.ui.theme.NoisyBg
 import com.nkot117.noisemeter.ui.theme.NoisyText
 import com.nkot117.noisemeter.ui.theme.NormalBg
@@ -78,7 +83,7 @@ fun NoiseMeterScreen(
             uiState = uiState,
             startRecording = { viewModel.startRecording() },
             stopRecording = { viewModel.stopRecording() },
-            modifier = Modifier.padding((innerPadding)),
+            modifier = Modifier.padding(innerPadding),
         )
     }
 }
@@ -91,8 +96,11 @@ fun NoiseMeterContent(
     stopRecording: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val scrollState = rememberScrollState()
     Column(
         modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
     ) {
         Card(
             modifier = Modifier
@@ -151,7 +159,7 @@ fun NoiseMeterContent(
 
         Spacer(Modifier.height(24.dp))
 
-        var expanded by remember { mutableStateOf(false) }
+        var expanded by remember { mutableStateOf(true) }
         val arrowRotation by animateFloatAsState(
             targetValue = if (expanded) 180f else 0f,
         )
@@ -197,75 +205,185 @@ fun NoiseMeterContent(
                     )
                 ) {
                     Column {
-                        Row {
-                            Text(
-                                text = "0 ~ 20 dB",
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.weight(1f)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_quit),
+                                contentDescription = "非常に静か",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(56.dp)
                             )
+
+                            Column(
+                                modifier = Modifier.width(200.dp)
+                            ) {
+                                Text(
+                                    text = "0 ~ 20 dB",
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+
+                                Text(
+                                    text = "図書館、深夜の住宅地",
+                                    style = MaterialTheme.typography.labelMedium,
+                                )
+                            }
                             Text(
                                 text = "非常に静か",
                                 color = VeryQuietText,
                                 style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.width(64.dp)
                             )
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                        Row {
-                            Text(
-                                text = "21 ~ 40 dB",
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.weight(1f)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_soft),
+                                contentDescription = "静か",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(56.dp)
                             )
+
+                            Column(
+                                modifier = Modifier.width(200.dp)
+                            ) {
+                                Text(
+                                    text = "21 ~ 40 dB",
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+
+                                Text(
+                                    text = "静かなカフェ、読書室",
+                                    style = MaterialTheme.typography.labelMedium,
+                                )
+                            }
                             Text(
                                 text = "静か",
                                 color = QuietText,
                                 style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.width(64.dp)
                             )
                         }
-                        Row {
-                            Text(
-                                text = "41 ~ 60 dB",
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.weight(1f)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_normal),
+                                contentDescription = "普通",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(56.dp)
                             )
+
+                            Column(
+                                modifier = Modifier.width(200.dp)
+                            ) {
+                                Text(
+                                    text = "41 ~ 60 dB",
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+
+                                Text(
+                                    text = "日常会話、オフィス",
+                                    style = MaterialTheme.typography.labelMedium,
+                                )
+                            }
                             Text(
                                 text = "普通",
+                                color = NormalText,
                                 style = MaterialTheme.typography.labelMedium,
-                                color = NormalText
+                                modifier = Modifier.width(64.dp)
                             )
                         }
-                        Row {
-                            Text(
-                                text = "61 ~ 80 dB",
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.weight(1f)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        //
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_loud),
+                                contentDescription = "騒がしい",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(56.dp)
                             )
+
+                            Column(
+                                modifier = Modifier.width(200.dp)
+                            ) {
+                                Text(
+                                    text = "61 ~ 80 dB",
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+
+                                Text(
+                                    text = "賑やかな街中、掃除機",
+                                    style = MaterialTheme.typography.labelMedium,
+                                )
+                            }
                             Text(
                                 text = "騒がしい",
-                                style = MaterialTheme.typography.labelMedium,
                                 color = NoisyText,
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.width(64.dp)
                             )
                         }
-                        Row {
-                            Text(
-                                text = "81+ dB",
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.weight(1f)
+                        Spacer(modifier = Modifier.height(8.dp))
+
+
+                        //
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_very_loud),
+                                contentDescription = "非常に騒がしい",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(56.dp)
                             )
+
+                            Column(
+                                modifier = Modifier.width(200.dp)
+                            ) {
+                                Text(
+                                    text = "81+ dB",
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+
+                                Text(
+                                    text = "車の通る道路、電車",
+                                    style = MaterialTheme.typography.labelMedium,
+                                )
+                            }
                             Text(
                                 text = "非常に騒がしい",
-                                style = MaterialTheme.typography.labelMedium,
                                 color = VeryNoisyText,
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.width(64.dp)
                             )
                         }
                     }
                 }
-
-
             }
         }
+        Spacer(modifier = Modifier.height(8.dp))
     }
-
 }
 
 @Composable
