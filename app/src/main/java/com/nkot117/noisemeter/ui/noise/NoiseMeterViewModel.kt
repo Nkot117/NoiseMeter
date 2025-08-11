@@ -10,12 +10,14 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import kotlin.math.abs
 import kotlin.math.log10
 import kotlin.math.sqrt
 
@@ -24,6 +26,7 @@ class NoiseMeterViewModel @Inject constructor() : ViewModel() {
     private val _uiState = MutableStateFlow<NoiseUiState>(NoiseUiState.Initial)
     val uiState: StateFlow<NoiseUiState> = _uiState.asStateFlow()
     lateinit var audioRecord: AudioRecord
+    private var recordingJob: Job? = null
 
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     fun startRecording() {
@@ -48,15 +51,18 @@ class NoiseMeterViewModel @Inject constructor() : ViewModel() {
         audioRecord.startRecording()
 
         try {
-            viewModelScope.launch(Dispatchers.Default) {
+            recordingJob = viewModelScope.launch(Dispatchers.Default) {
+                // 録音中は繰り返し処理を行う
                 val buffer = ShortArray(bufferSize)
-                while (_uiState.value is NoiseUiState.Recording) {
+                while (isActive) {
                     audioRecord.read(buffer, 0, buffer.size)
                     val sum = buffer.sumOf { it.toDouble() * it.toDouble() }
                     val amplitude = sqrt(sum / bufferSize)
                     val db = (20.0 * log10(amplitude)).toInt()
-                    Timber.d("Current:%s", db)
                     _uiState.value = NoiseUiState.Recording(dbLevel = db)
+                    delay(100)
+
+                    Timber.d("Current:%s", db)
                 }
             }
         } catch (e: Exception) {
@@ -66,11 +72,14 @@ class NoiseMeterViewModel @Inject constructor() : ViewModel() {
     }
 
     fun stopRecording() {
-        _uiState.value = NoiseUiState.Initial
+        recordingJob?.cancel()
+        recordingJob = null
+        val currentDbLevel = (_uiState.value as? NoiseUiState.Recording)?.dbLevel ?: 0
+        _uiState.value = NoiseUiState.Stopped(currentDbLevel)
         try {
-            // TODO: AudioRecordのリリースタスク
+            audioRecord.stop()
         } catch (e: Exception) {
-            _uiState.value = NoiseUiState.Error(message = "Error")
+            _uiState.value = NoiseUiState.Error("Error")
         }
     }
 }
