@@ -1,6 +1,9 @@
 package com.nkot117.noisemeter.ui.noise
 
 import android.Manifest
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -39,27 +41,55 @@ import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import timber.log.Timber
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@androidx.annotation.RequiresPermission(android.Manifest.permission.RECORD_AUDIO)
 @Composable
 fun NoiseMeterScreen(
     viewModel: NoiseMeterViewModel = hiltViewModel(),
 ) {
-    Timber.d("NoiseMeterScreen Compose");
+    Timber.d("NoiseMeterScreen Compose")
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold { innerPadding ->
         NoiseMeterContent(
+            uiState = uiState,
+            recordingAction = {
+                viewModel.startRecording()
+                              },
             modifier = Modifier.padding((innerPadding)),
         )
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
+
 @Composable
 fun NoiseMeterContent(
+    uiState: NoiseUiState,
+    recordingAction: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    when (
+        uiState
+    ) {
+        NoiseUiState.Initial -> InitialContent(db = 0, modifier = modifier,recordingAction)
+        is NoiseUiState.Recording -> InitialContent(db = uiState.dbLevel, modifier = modifier, {})
+        is NoiseUiState.Error -> TODO()
+    }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun InitialContent(
+    db: Int,
+    modifier: Modifier = Modifier,
+    recordingAction: () -> Unit
+) {
     val audioPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
+    val progress = db / 120F
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress.coerceIn(0f, 1f),
+        animationSpec = tween(durationMillis = 500, easing = LinearOutSlowInEasing)
+    )
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -98,7 +128,7 @@ fun NoiseMeterContent(
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .fillMaxWidth(0.8F.coerceIn(0f, 1f))
+                    .fillMaxWidth(animatedProgress)
                     .background(MaterialTheme.colorScheme.primary)
             )
         }
@@ -121,7 +151,7 @@ fun NoiseMeterContent(
                 .width(500.dp),
             onClick = {
                 if (audioPermissionState.status === PermissionStatus.Granted) {
-                    // TODO 音量取得処理を実行
+                    recordingAction()
                 } else {
                     audioPermissionState.launchPermissionRequest()
                 }
@@ -138,9 +168,8 @@ fun NoiseMeterContent(
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun PreviewNoiseMeterContent() {
-    NoiseMeterContent()
+    InitialContent(20, recordingAction = {})
 }
