@@ -100,7 +100,7 @@ fun InitialContent(
 
         // デジベル数値の表示
         Text(
-            text = "0.0",
+            text = db.toString(),
             style = MaterialTheme.typography.displayLarge,
             fontWeight = FontWeight.Bold
         )
