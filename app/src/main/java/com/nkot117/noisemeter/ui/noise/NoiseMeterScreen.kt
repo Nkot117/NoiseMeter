@@ -198,10 +198,10 @@ fun StartRecordingButton(
             .height(48.dp)
             .width(500.dp),
         onClick = {
-            if (audioPermissionState?.status !== PermissionStatus.Granted) {
+            if (audioPermissionState?.status == PermissionStatus.Granted) {
                 clickAction()
             } else {
-                audioPermissionState.launchPermissionRequest()
+                audioPermissionState?.launchPermissionRequest()
             }
         },
     ) {
