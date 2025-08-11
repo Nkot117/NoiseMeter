@@ -32,7 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,7 +43,7 @@ import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import timber.log.Timber
 
-@androidx.annotation.RequiresPermission(android.Manifest.permission.RECORD_AUDIO)
+@androidx.annotation.RequiresPermission(Manifest.permission.RECORD_AUDIO)
 @Composable
 fun NoiseMeterScreen(
     viewModel: NoiseMeterViewModel = hiltViewModel(),
@@ -84,7 +86,7 @@ fun NoiseMeterContent(
                 NoiseMeterBody(
                     db = 0
                 )
-
+                Spacer(Modifier.height(24.dp))
                 StartRecordingButton(startRecording)
             }
 
@@ -93,7 +95,7 @@ fun NoiseMeterContent(
                 NoiseMeterBody(
                     db = uiState.dbLevel,
                 )
-
+                Spacer(Modifier.height(24.dp))
                 StopRecordingButton(stopRecording)
             }
 
@@ -102,7 +104,7 @@ fun NoiseMeterContent(
                 NoiseMeterBody(
                     db = uiState.dbLevel
                 )
-
+                Spacer(Modifier.height(24.dp))
                 StartRecordingButton(startRecording)
             }
 
@@ -184,14 +186,19 @@ fun DbLevelBar(
 fun StartRecordingButton(
     clickAction: () -> Unit
 ) {
-    val audioPermissionState = rememberPermissionState(Manifest.permission.RECORD_AUDIO)
+    val isPreview = LocalInspectionMode.current
+    val audioPermissionState = if (!isPreview) {
+        rememberPermissionState(Manifest.permission.RECORD_AUDIO)
+    } else {
+        null
+    }
 
     Button(
         modifier = Modifier
             .height(48.dp)
             .width(500.dp),
         onClick = {
-            if (audioPermissionState.status === PermissionStatus.Granted) {
+            if (audioPermissionState?.status !== PermissionStatus.Granted) {
                 clickAction()
             } else {
                 audioPermissionState.launchPermissionRequest()
@@ -228,4 +235,44 @@ fun StopRecordingButton(
         Spacer(Modifier.width(8.dp))
         Text(text = "測定停止")
     }
+}
+
+@Preview(showBackground = true, name = "Initial State")
+@Composable
+fun PreviewNoiseMeterContent_Initial() {
+    NoiseMeterContent(
+        uiState = NoiseUiState.Initial,
+        startRecording = {},
+        stopRecording = {},
+    )
+}
+
+@Preview(showBackground = true, name = "Recording State")
+@Composable
+fun PreviewNoiseMeterContent_Recording() {
+    NoiseMeterContent(
+        uiState = NoiseUiState.Recording(dbLevel = 60),
+        startRecording = {},
+        stopRecording = {},
+    )
+}
+
+@Preview(showBackground = true, name = "Stopped State")
+@Composable
+fun PreviewNoiseMeterContent_Stopped() {
+    NoiseMeterContent(
+        uiState = NoiseUiState.Stopped(dbLevel = 35),
+        startRecording = {},
+        stopRecording = {},
+    )
+}
+
+@Preview(showBackground = true, name = "Error State")
+@Composable
+fun PreviewNoiseMeterContent_Error() {
+    NoiseMeterContent(
+        uiState = NoiseUiState.Error(message = "録音エラー"),
+        startRecording = {},
+        stopRecording = {},
+    )
 }
