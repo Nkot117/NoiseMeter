@@ -1,6 +1,7 @@
 package com.nkot117.noisemeter.ui.noise
 
 import android.Manifest
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -22,6 +23,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -41,6 +44,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
+import com.nkot117.noisemeter.ui.theme.NoisyBg
+import com.nkot117.noisemeter.ui.theme.NoisyText
+import com.nkot117.noisemeter.ui.theme.NormalBg
+import com.nkot117.noisemeter.ui.theme.NormalText
+import com.nkot117.noisemeter.ui.theme.QuietBg
+import com.nkot117.noisemeter.ui.theme.QuietText
+import com.nkot117.noisemeter.ui.theme.VeryNoisyBg
+import com.nkot117.noisemeter.ui.theme.VeryNoisyText
+import com.nkot117.noisemeter.ui.theme.VeryQuietBg
+import com.nkot117.noisemeter.ui.theme.VeryQuietText
 import timber.log.Timber
 
 @androidx.annotation.RequiresPermission(Manifest.permission.RECORD_AUDIO)
@@ -76,17 +89,18 @@ fun NoiseMeterContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "音量メーター", style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.height(24.dp))
 
         Timber.d("Current Ui State: $uiState")
-        when (
-            uiState
-        ) {
+        when (uiState) {
             NoiseUiState.Initial -> {
                 // 初期表示時
                 NoiseMeterBody(
                     db = 0
                 )
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(18.dp))
+                DbLevelCard(0)
+                Spacer(Modifier.height(35.dp))
                 StartRecordingButton(startRecording)
             }
 
@@ -95,7 +109,9 @@ fun NoiseMeterContent(
                 NoiseMeterBody(
                     db = uiState.dbLevel,
                 )
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(18.dp))
+                DbLevelCard(uiState.dbLevel)
+                Spacer(Modifier.height(35.dp))
                 StopRecordingButton(stopRecording)
             }
 
@@ -104,7 +120,9 @@ fun NoiseMeterContent(
                 NoiseMeterBody(
                     db = uiState.dbLevel
                 )
-                Spacer(Modifier.height(24.dp))
+                Spacer(Modifier.height(18.dp))
+                DbLevelCard(uiState.dbLevel)
+                Spacer(Modifier.height(35.dp))
                 StartRecordingButton(startRecording)
             }
 
@@ -141,8 +159,7 @@ fun DbLevelDisplay(
     )
 
     Text(
-        text = "dB",
-        style = MaterialTheme.typography.displaySmall
+        text = "dB", style = MaterialTheme.typography.displaySmall, color = Color.Gray
     )
 }
 
@@ -175,9 +192,52 @@ fun DbLevelBar(
     Row(
         modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text("0dB", style = MaterialTheme.typography.labelLarge)
-        Text("60dB", style = MaterialTheme.typography.labelLarge)
-        Text("120dB", style = MaterialTheme.typography.labelLarge)
+        Text("0dB", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
+        Text("60dB", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
+        Text("120dB", style = MaterialTheme.typography.labelLarge, color = Color.Gray)
+    }
+}
+
+@Composable
+fun DbLevelCard(
+    db: Int
+) {
+    val (dbLevel, targetBgColor, targetTextColor) = when (db) {
+        in 0..20 -> Triple("非常に静か", VeryQuietBg, VeryQuietText)
+        in 21..40 -> Triple("静か", QuietBg, QuietText)
+        in 41..60 -> Triple("普通", NormalBg, NormalText)
+        in 61..80 -> Triple("騒がしい", NoisyBg, NoisyText)
+        else -> Triple("非常に騒がしい", VeryNoisyBg, VeryNoisyText)
+    }
+
+    val backgroundColor by animateColorAsState(
+        targetValue = targetBgColor,
+        animationSpec = tween(durationMillis = 600, easing = LinearOutSlowInEasing),
+        label = "bgColorAnim"
+    )
+    val textColor by animateColorAsState(
+        targetValue = targetTextColor,
+        animationSpec = tween(durationMillis = 600, easing = LinearOutSlowInEasing),
+        label = "textColorAnim"
+    )
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+
+        ) {
+        Box(
+            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = dbLevel,
+                style = MaterialTheme.typography.labelLarge,
+                color = textColor,
+            )
+        }
     }
 }
 
@@ -219,6 +279,7 @@ fun StartRecordingButton(
 fun StopRecordingButton(
     clickAction: () -> Unit
 ) {
+    // TODO: 汎用化したボタンを作りたい
     Button(
         modifier = Modifier
             .height(48.dp)
@@ -275,4 +336,22 @@ fun PreviewNoiseMeterContent_Error() {
         startRecording = {},
         stopRecording = {},
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewDbLevelCard() {
+    MaterialTheme {
+        Column(modifier = Modifier.fillMaxSize()) {
+            DbLevelCard(db = 10)  // 非常に静か
+            Spacer(modifier = Modifier.height(20.dp))
+            DbLevelCard(db = 30)  // 静か
+            Spacer(modifier = Modifier.height(20.dp))
+            DbLevelCard(db = 50)  // 普通
+            Spacer(modifier = Modifier.height(20.dp))
+            DbLevelCard(db = 70)  // 騒がしい
+            Spacer(modifier = Modifier.height(20.dp))
+            DbLevelCard(db = 90)  // 非常に騒がしい
+        }
+    }
 }
