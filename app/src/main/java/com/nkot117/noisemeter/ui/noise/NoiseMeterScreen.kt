@@ -1,11 +1,15 @@
 package com.nkot117.noisemeter.ui.noise
 
 import android.Manifest
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -31,9 +36,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
@@ -84,51 +93,179 @@ fun NoiseMeterContent(
 ) {
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "音量メーター", style = MaterialTheme.typography.titleLarge)
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        ) {
+            Column(
+                modifier = modifier
+                    .padding(horizontal = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "音量メーター", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(24.dp))
+
+                Timber.d("Current Ui State: $uiState")
+                when (uiState) {
+                    NoiseUiState.Initial -> {
+                        // 初期表示時
+                        NoiseMeterBody(
+                            db = 0
+                        )
+                        Spacer(Modifier.height(18.dp))
+                        DbLevelCard(0)
+                        Spacer(Modifier.height(35.dp))
+                        StartRecordingButton(startRecording)
+                    }
+
+                    is NoiseUiState.Recording -> {
+                        // レコーディング中
+                        NoiseMeterBody(
+                            db = uiState.dbLevel,
+                        )
+                        Spacer(Modifier.height(18.dp))
+                        DbLevelCard(uiState.dbLevel)
+                        Spacer(Modifier.height(35.dp))
+                        StopRecordingButton(stopRecording)
+                    }
+
+                    is NoiseUiState.Stopped -> {
+                        // 停止中
+                        NoiseMeterBody(
+                            db = uiState.dbLevel
+                        )
+                        Spacer(Modifier.height(18.dp))
+                        DbLevelCard(uiState.dbLevel)
+                        Spacer(Modifier.height(35.dp))
+                        StartRecordingButton(startRecording)
+                    }
+
+                    is NoiseUiState.Error -> {}
+                }
+            }
+        }
+
         Spacer(Modifier.height(24.dp))
 
-        Timber.d("Current Ui State: $uiState")
-        when (uiState) {
-            NoiseUiState.Initial -> {
-                // 初期表示時
-                NoiseMeterBody(
-                    db = 0
-                )
-                Spacer(Modifier.height(18.dp))
-                DbLevelCard(0)
-                Spacer(Modifier.height(35.dp))
-                StartRecordingButton(startRecording)
-            }
+        var expanded by remember { mutableStateOf(false) }
+        val arrowRotation by animateFloatAsState(
+            targetValue = if (expanded) 180f else 0f,
+        )
 
-            is NoiseUiState.Recording -> {
-                // レコーディング中
-                NoiseMeterBody(
-                    db = uiState.dbLevel,
-                )
-                Spacer(Modifier.height(18.dp))
-                DbLevelCard(uiState.dbLevel)
-                Spacer(Modifier.height(35.dp))
-                StopRecordingButton(stopRecording)
-            }
+        Card(
+            modifier = Modifier.padding(horizontal = 12.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .clickable { expanded = !expanded },
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "デシベル参考表",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Icon(
+                        imageVector = Icons.Filled.KeyboardArrowDown,
+                        contentDescription = null,
+                        modifier = Modifier.rotate(arrowRotation)
+                    )
+                }
 
-            is NoiseUiState.Stopped -> {
-                // 停止中
-                NoiseMeterBody(
-                    db = uiState.dbLevel
-                )
                 Spacer(Modifier.height(18.dp))
-                DbLevelCard(uiState.dbLevel)
-                Spacer(Modifier.height(35.dp))
-                StartRecordingButton(startRecording)
-            }
 
-            is NoiseUiState.Error -> {}
+                AnimatedVisibility(
+                    visible = expanded,
+                    enter = expandVertically(
+                        expandFrom = Alignment.Top,
+                        animationSpec = tween()
+                    ),
+                    exit = shrinkVertically(
+                        shrinkTowards = Alignment.Top,
+                        animationSpec = tween()
+                    )
+                ) {
+                    Column {
+                        Row {
+                            Text(
+                                text = "0 ~ 20 dB",
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = "非常に静か",
+                                color = VeryQuietText,
+                                style = MaterialTheme.typography.labelMedium,
+                            )
+                        }
+
+                        Row {
+                            Text(
+                                text = "21 ~ 40 dB",
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = "静か",
+                                color = QuietText,
+                                style = MaterialTheme.typography.labelMedium,
+                            )
+                        }
+                        Row {
+                            Text(
+                                text = "41 ~ 60 dB",
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = "普通",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = NormalText
+                            )
+                        }
+                        Row {
+                            Text(
+                                text = "61 ~ 80 dB",
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = "騒がしい",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = NoisyText,
+                            )
+                        }
+                        Row {
+                            Text(
+                                text = "81+ dB",
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = "非常に騒がしい",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = VeryNoisyText,
+                            )
+                        }
+                    }
+                }
+
+
+            }
         }
     }
+
 }
 
 @Composable
