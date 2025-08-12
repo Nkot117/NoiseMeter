@@ -1,4 +1,4 @@
-package com.nkot117.noisemeter.ui.noise
+package com.nkot117.noisemeter.ui.screen.noise
 
 sealed class NoiseUiState {
     object Initial: NoiseUiState()
