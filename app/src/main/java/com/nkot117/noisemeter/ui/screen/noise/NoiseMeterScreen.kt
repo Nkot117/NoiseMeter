@@ -59,6 +59,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import com.nkot117.noisemeter.R
+import com.nkot117.noisemeter.ui.common.IconTextButton
 import com.nkot117.noisemeter.ui.theme.NoisyBg
 import com.nkot117.noisemeter.ui.theme.NoisyText
 import com.nkot117.noisemeter.ui.theme.NormalBg
@@ -509,49 +510,38 @@ fun StartRecordingButton(
         null
     }
 
-    Button(
+    IconTextButton(
+        buttonText= "測定停止",
+        icon = Icons.Default.PlayArrow,
         modifier = Modifier
             .height(48.dp)
-            .width(500.dp),
-        onClick = {
+            .fillMaxWidth(),
+        onClick= {
             if (audioPermissionState?.status == PermissionStatus.Granted) {
                 clickAction()
             } else {
                 audioPermissionState?.launchPermissionRequest()
             }
         },
-    ) {
-        Icon(
-            imageVector = Icons.Default.PlayArrow,
-            contentDescription = null,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(Modifier.width(8.dp))
-        Text(text = "測定開始")
-    }
+        contentDescription = "測定停止ボタン"
+    )
 }
 
 @Composable
 fun StopRecordingButton(
     clickAction: () -> Unit
 ) {
-    // TODO: 汎用化したボタンを作りたい
-    Button(
+    IconTextButton(
+        buttonText= "測定停止",
+        icon = Icons.Default.Check,
         modifier = Modifier
             .height(48.dp)
-            .width(500.dp),
-        onClick = {
-            clickAction()
-        },
-    ) {
-        Icon(
-            imageVector = Icons.Default.Check,
-            contentDescription = null,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(Modifier.width(8.dp))
-        Text(text = "測定停止")
-    }
+            .fillMaxWidth(),
+    onClick= {
+        clickAction()
+    },
+    contentDescription = "測定停止ボタン"
+    )
 }
 
 @Preview(showBackground = true, name = "Initial State")
