@@ -1,7 +1,7 @@
 package com.nkot117.noisemeter.ui.screen.noise
 
 import android.Manifest
-import androidx.annotation.RequiresPermission
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -70,7 +70,7 @@ import com.nkot117.noisemeter.ui.theme.VeryQuietBg
 import com.nkot117.noisemeter.ui.theme.VeryQuietText
 import timber.log.Timber
 
-@RequiresPermission(Manifest.permission.RECORD_AUDIO)
+@SuppressLint("MissingPermission")
 @Composable
 fun NoiseMeterScreen(
     viewModel: NoiseMeterViewModel = hiltViewModel(),
