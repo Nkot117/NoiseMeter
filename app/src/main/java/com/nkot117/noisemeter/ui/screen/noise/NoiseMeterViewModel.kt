@@ -17,16 +17,21 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import kotlin.math.log10
 import kotlin.math.sqrt
 
 @HiltViewModel
 class NoiseMeterViewModel @Inject constructor() : ViewModel() {
+    // UiState
     private val _uiState = MutableStateFlow<NoiseUiState>(NoiseUiState.Initial)
     val uiState: StateFlow<NoiseUiState> = _uiState.asStateFlow()
+
+    // AudioRecord
     lateinit var audioRecord: AudioRecord
     private var recordingJob: Job? = null
+    private var correctDbList: ArrayList<Int> = arrayListOf()
 
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     fun startRecording() {
@@ -59,9 +64,13 @@ class NoiseMeterViewModel @Inject constructor() : ViewModel() {
                     val sum = buffer.sumOf { it.toDouble() * it.toDouble() }
                     val amplitude = sqrt(sum / bufferSize).coerceAtLeast(1.0)
                     val db = (20.0 * log10(amplitude)).toInt()
-                    _uiState.value = NoiseUiState.Recording(dbLevel = db)
-                    delay(100)
 
+                    withContext(Dispatchers.Main) {
+                        _uiState.value = NoiseUiState.Recording(dbLevel = db)
+                    }
+
+                    correctDbList.add(db)
+                    delay(500)
                     Timber.d("Current:%s", db)
                 }
             }
@@ -73,7 +82,11 @@ class NoiseMeterViewModel @Inject constructor() : ViewModel() {
 
     fun stopRecording() {
         val currentDbLevel = (_uiState.value as? NoiseUiState.Recording)?.dbLevel ?: 0
-        _uiState.value = NoiseUiState.Stopped(currentDbLevel)
+        val correctCount = correctDbList.size
+        val averageDb = correctDbList.sum() / correctCount
+        _uiState.value = NoiseUiState.Stopped(dbLevel = currentDbLevel, averageDb = averageDb)
+
+        correctDbList = arrayListOf()
         try {
             audioRecord.stop()
             recordingJob?.cancel()

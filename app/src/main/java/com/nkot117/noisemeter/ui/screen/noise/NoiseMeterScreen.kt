@@ -124,15 +124,16 @@ fun NoiseMeterContent(
                 var expanded by remember { mutableStateOf(false) }
 
 
-                val db = when(uiState) {
-                    is NoiseUiState.Error -> 0
-                    NoiseUiState.Initial -> 0
-                    is NoiseUiState.Recording -> uiState.dbLevel
-                    is NoiseUiState.Stopped -> uiState.dbLevel
+                val (db, averageDb) = when (uiState) {
+                    is NoiseUiState.Error -> Pair(0, 0)
+                    NoiseUiState.Initial -> Pair(0, 0)
+                    is NoiseUiState.Recording -> Pair(uiState.dbLevel, 0)
+                    is NoiseUiState.Stopped -> Pair(uiState.dbLevel, uiState.averageDb)
                 }
 
                 NoiseMeterBody(
                     db = db,
+                    averageDb = averageDb,
                     expanded
                 )
 
@@ -238,6 +239,7 @@ fun NoiseMeterContent(
 @Composable
 fun NoiseMeterBody(
     db: Int,
+    averageDb: Int,
     expanded: Boolean
 ) {
     val progress = db / 120F
@@ -254,7 +256,7 @@ fun NoiseMeterBody(
 
     Spacer(Modifier.height(18.dp))
 
-    DbLevelCard(db, expanded)
+    DbLevelCard(db = db, averageDb = averageDb, expanded = expanded)
 }
 
 @Composable
@@ -310,6 +312,7 @@ fun DbLevelBar(
 @Composable
 fun DbLevelCard(
     db: Int,
+    averageDb: Int,
     expanded: Boolean,
 ) {
     val (dbLevel, targetBgColor, targetTextColor) = when (db) {
@@ -364,7 +367,11 @@ fun DbLevelCard(
                     animationSpec = tween(durationMillis = 600)
                 )
             ) {
-                Text(dbLevel.example)
+                // TODO: 測り終わった時のDBと平均のDBをどう出すか
+                Column {
+                    Text(averageDb.toString())
+                    Text(dbLevel.example)
+                }
             }
         }
     }
@@ -483,7 +490,7 @@ fun PreviewNoiseMeterContent_Recording() {
 @Composable
 fun PreviewNoiseMeterContent_Stopped() {
     NoiseMeterContent(
-        uiState = NoiseUiState.Stopped(dbLevel = 35),
+        uiState = NoiseUiState.Stopped(dbLevel = 35, averageDb = 20),
         startRecording = {},
         stopRecording = {},
     )
@@ -504,15 +511,15 @@ fun PreviewNoiseMeterContent_Error() {
 fun PreviewDbLevelCard() {
     MaterialTheme {
         Column(modifier = Modifier.fillMaxSize()) {
-            DbLevelCard(db = 10, expanded = true)  // 非常に静か
+            DbLevelCard(db = 10, averageDb = 10, expanded = true)  // 非常に静か
             Spacer(modifier = Modifier.height(20.dp))
-            DbLevelCard(db = 30, expanded = true)  // 静か
+            DbLevelCard(db = 30, averageDb = 30, expanded = true)  // 静か
             Spacer(modifier = Modifier.height(20.dp))
-            DbLevelCard(db = 50, expanded = true)  // 普通
+            DbLevelCard(db = 50, averageDb = 50, expanded = true)  // 普通
             Spacer(modifier = Modifier.height(20.dp))
-            DbLevelCard(db = 70, expanded = true)  // 騒がしい
+            DbLevelCard(db = 70, averageDb = 70, expanded = true)  // 騒がしい
             Spacer(modifier = Modifier.height(20.dp))
-            DbLevelCard(db = 90, expanded = true)  // 非常に騒がしい
+            DbLevelCard(db = 90, averageDb = 90, expanded = true)  // 非常に騒がしい
         }
     }
 }
