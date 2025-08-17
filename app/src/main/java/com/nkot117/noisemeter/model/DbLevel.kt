@@ -1,8 +1,5 @@
 package com.nkot117.noisemeter.model
 
-import androidx.annotation.DrawableRes
-import kotlin.math.max
-
 enum class DbLevel(
     val min: Int,
     val max: Int,
