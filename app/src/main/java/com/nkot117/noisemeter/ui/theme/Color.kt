@@ -228,8 +228,8 @@ val QuietText = Color(0xFF33691E)
 val NormalBg = Color(0xFFFFF9C4)
 val NormalText = Color(0xFFF57F17)
 
-val NoisyBg = Color(0xFFFFCCBC)
-val NoisyText = Color(0xFFE65100)
+val LoudBg = Color(0xFFFFCCBC)
+val LoudText = Color(0xFFE65100)
 
-val VeryNoisyBg = Color(0xFFFFCDD2)
-val VeryNoisyText = Color(0xFFC62828)
+val VeryLoudBg = Color(0xFFFFCDD2)
+val VeryLoudText = Color(0xFFC62828)

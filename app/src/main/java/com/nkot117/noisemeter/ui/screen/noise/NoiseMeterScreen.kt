@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -56,16 +58,17 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import com.nkot117.noisemeter.R
+import com.nkot117.noisemeter.model.DbLevel
 import com.nkot117.noisemeter.ui.common.IconTextButton
 import com.nkot117.noisemeter.ui.common.IconTextOutlinedButton
-import com.nkot117.noisemeter.ui.theme.NoisyBg
-import com.nkot117.noisemeter.ui.theme.NoisyText
+import com.nkot117.noisemeter.ui.theme.LoudBg
+import com.nkot117.noisemeter.ui.theme.LoudText
 import com.nkot117.noisemeter.ui.theme.NormalBg
 import com.nkot117.noisemeter.ui.theme.NormalText
 import com.nkot117.noisemeter.ui.theme.QuietBg
 import com.nkot117.noisemeter.ui.theme.QuietText
-import com.nkot117.noisemeter.ui.theme.VeryNoisyBg
-import com.nkot117.noisemeter.ui.theme.VeryNoisyText
+import com.nkot117.noisemeter.ui.theme.VeryLoudBg
+import com.nkot117.noisemeter.ui.theme.VeryLoudText
 import com.nkot117.noisemeter.ui.theme.VeryQuietBg
 import com.nkot117.noisemeter.ui.theme.VeryQuietText
 import timber.log.Timber
@@ -205,177 +208,19 @@ fun NoiseMeterContent(
                     )
                 ) {
                     Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_quit),
-                                contentDescription = "非常に静か",
-                                tint = Color.Unspecified,
-                                modifier = Modifier.size(56.dp)
-                            )
-
-                            Column(
-                                modifier = Modifier.width(200.dp)
-                            ) {
-                                Text(
-                                    text = "0 ~ 20 dB",
-                                    style = MaterialTheme.typography.labelLarge,
-                                )
-
-                                Text(
-                                    text = "図書館、深夜の住宅地",
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
+                        DbLevel.entries.forEach { dbLeve ->
+                            val (textColor, icon) = when (dbLeve) {
+                                DbLevel.QUIET -> Pair(VeryQuietText, R.drawable.ic_quit)
+                                DbLevel.SOFT -> Pair(QuietText, R.drawable.ic_soft)
+                                DbLevel.NORMAL -> Pair(NormalText, R.drawable.ic_normal)
+                                DbLevel.LOUD -> Pair(LoudText, R.drawable.ic_loud)
+                                DbLevel.VERY_LOUD -> Pair(VeryLoudText, R.drawable.ic_very_loud)
                             }
-                            Text(
-                                text = "非常に静か",
-                                color = VeryQuietText,
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.width(64.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_soft),
-                                contentDescription = "静か",
-                                tint = Color.Unspecified,
-                                modifier = Modifier.size(56.dp)
-                            )
-
-                            Column(
-                                modifier = Modifier.width(200.dp)
-                            ) {
-                                Text(
-                                    text = "21 ~ 40 dB",
-                                    style = MaterialTheme.typography.labelLarge,
-                                )
-
-                                Text(
-                                    text = "静かなカフェ、読書室",
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
-                            }
-                            Text(
-                                text = "静か",
-                                color = QuietText,
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.width(64.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_normal),
-                                contentDescription = "普通",
-                                tint = Color.Unspecified,
-                                modifier = Modifier.size(56.dp)
-                            )
-
-                            Column(
-                                modifier = Modifier.width(200.dp)
-                            ) {
-                                Text(
-                                    text = "41 ~ 60 dB",
-                                    style = MaterialTheme.typography.labelLarge,
-                                )
-
-                                Text(
-                                    text = "日常会話、オフィス",
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
-                            }
-                            Text(
-                                text = "普通",
-                                color = NormalText,
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.width(64.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        //
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_loud),
-                                contentDescription = "騒がしい",
-                                tint = Color.Unspecified,
-                                modifier = Modifier.size(56.dp)
-                            )
-
-                            Column(
-                                modifier = Modifier.width(200.dp)
-                            ) {
-                                Text(
-                                    text = "61 ~ 80 dB",
-                                    style = MaterialTheme.typography.labelLarge,
-                                )
-
-                                Text(
-                                    text = "賑やかな街中、掃除機",
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
-                            }
-                            Text(
-                                text = "騒がしい",
-                                color = NoisyText,
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.width(64.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-
-
-                        //
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_very_loud),
-                                contentDescription = "非常に騒がしい",
-                                tint = Color.Unspecified,
-                                modifier = Modifier.size(56.dp)
-                            )
-
-                            Column(
-                                modifier = Modifier.width(200.dp)
-                            ) {
-                                Text(
-                                    text = "81+ dB",
-                                    style = MaterialTheme.typography.labelLarge,
-                                )
-
-                                Text(
-                                    text = "車の通る道路、電車",
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
-                            }
-                            Text(
-                                text = "非常に騒がしい",
-                                color = VeryNoisyText,
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.width(64.dp)
+                            DbLevelRow(
+                                dbLevel = dbLeve,
+                                icon = ImageVector.vectorResource(icon),
+                                textColor = textColor,
                             )
                         }
                     }
@@ -460,8 +305,8 @@ fun DbLevelCard(
         in 0..20 -> Triple("非常に静か", VeryQuietBg, VeryQuietText)
         in 21..40 -> Triple("静か", QuietBg, QuietText)
         in 41..60 -> Triple("普通", NormalBg, NormalText)
-        in 61..80 -> Triple("騒がしい", NoisyBg, NoisyText)
-        else -> Triple("非常に騒がしい", VeryNoisyBg, VeryNoisyText)
+        in 61..80 -> Triple("騒がしい", LoudBg, LoudText)
+        else -> Triple("非常に騒がしい", VeryLoudBg, VeryLoudText)
     }
 
     val backgroundColor by animateColorAsState(
@@ -476,22 +321,41 @@ fun DbLevelCard(
     )
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp),
+        modifier = Modifier.fillMaxSize(),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+    ) {
 
-        ) {
-        Box(
-            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        var expanded by remember { mutableStateOf(false) }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = dbLevel,
                 style = MaterialTheme.typography.labelLarge,
                 color = textColor,
             )
+
+            AnimatedVisibility(
+                visible = expanded,
+                enter = expandVertically(
+                    expandFrom = Alignment.Top,
+                    animationSpec = tween()
+                ),
+                exit = shrinkVertically(
+                    shrinkTowards = Alignment.Top,
+                    animationSpec = tween()
+                )
+            ) {
+                Text("test")
+            }
         }
+
+
     }
 }
 
@@ -539,6 +403,49 @@ fun StopRecordingButton(
         },
         contentDescription = "測定停止ボタン"
     )
+}
+
+@Composable
+fun DbLevelRow(
+    dbLevel: DbLevel,
+    icon: ImageVector,
+    textColor: Color = Color.Black,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = dbLevel.label,
+            tint = Color.Unspecified,
+            modifier = Modifier.size(56.dp)
+        )
+
+        Column(
+            modifier = Modifier.width(200.dp)
+        ) {
+            Text(
+                text = "${dbLevel.min} ~ ${dbLevel.max} dB",
+                style = MaterialTheme.typography.labelLarge
+            )
+
+            Text(
+                text = dbLevel.example,
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
+
+        Text(
+            text = dbLevel.label,
+            color = textColor,
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.width(64.dp)
+        )
+    }
 }
 
 @Preview(showBackground = true, name = "Initial State")
@@ -597,4 +504,14 @@ fun PreviewDbLevelCard() {
             DbLevelCard(db = 90)  // 非常に騒がしい
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewDbLevelRow() {
+    DbLevelRow(
+        dbLevel = DbLevel.VERY_LOUD,
+        icon = ImageVector.vectorResource(R.drawable.ic_very_loud),
+        textColor = VeryLoudText,
+    )
 }
