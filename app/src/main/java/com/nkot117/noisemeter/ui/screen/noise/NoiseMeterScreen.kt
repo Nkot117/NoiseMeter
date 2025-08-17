@@ -23,8 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -302,11 +300,11 @@ fun DbLevelCard(
     db: Int
 ) {
     val (dbLevel, targetBgColor, targetTextColor) = when (db) {
-        in 0..20 -> Triple("非常に静か", VeryQuietBg, VeryQuietText)
-        in 21..40 -> Triple("静か", QuietBg, QuietText)
-        in 41..60 -> Triple("普通", NormalBg, NormalText)
-        in 61..80 -> Triple("騒がしい", LoudBg, LoudText)
-        else -> Triple("非常に騒がしい", VeryLoudBg, VeryLoudText)
+        in DbLevel.QUIET.min .. DbLevel.QUIET.max -> Triple(DbLevel.QUIET.label, VeryQuietBg, VeryQuietText)
+        in DbLevel.SOFT.min .. DbLevel.SOFT.max -> Triple(DbLevel.SOFT.label, QuietBg, QuietText)
+        in DbLevel.NORMAL.min .. DbLevel.NORMAL.max -> Triple(DbLevel.NORMAL.label, NormalBg, NormalText)
+        in DbLevel.LOUD.min .. DbLevel.LOUD.max -> Triple(DbLevel.LOUD.label, LoudBg, LoudText)
+        else -> Triple(DbLevel.VERY_LOUD.label, VeryLoudBg, VeryLoudText)
     }
 
     val backgroundColor by animateColorAsState(
