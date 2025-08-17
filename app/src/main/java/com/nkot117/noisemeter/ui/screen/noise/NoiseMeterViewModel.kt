@@ -57,7 +57,7 @@ class NoiseMeterViewModel @Inject constructor() : ViewModel() {
                 while (isActive) {
                     audioRecord.read(buffer, 0, buffer.size)
                     val sum = buffer.sumOf { it.toDouble() * it.toDouble() }
-                    val amplitude = sqrt(sum / bufferSize)
+                    val amplitude = sqrt(sum / bufferSize).coerceAtLeast(1.0)
                     val db = (20.0 * log10(amplitude)).toInt()
                     _uiState.value = NoiseUiState.Recording(dbLevel = db)
                     delay(100)
@@ -72,14 +72,14 @@ class NoiseMeterViewModel @Inject constructor() : ViewModel() {
     }
 
     fun stopRecording() {
-        recordingJob?.cancel()
-        recordingJob = null
         val currentDbLevel = (_uiState.value as? NoiseUiState.Recording)?.dbLevel ?: 0
         _uiState.value = NoiseUiState.Stopped(currentDbLevel)
         try {
             audioRecord.stop()
+            recordingJob?.cancel()
+            recordingJob = null
         } catch (e: Exception) {
-            _uiState.value = NoiseUiState.Error("Error")
+            _uiState.value = NoiseUiState.Error(e.message.toString())
         }
     }
 }
