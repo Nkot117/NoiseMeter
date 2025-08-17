@@ -122,14 +122,24 @@ fun NoiseMeterContent(
 
                 Timber.d("Current Ui State: $uiState")
                 var expanded by remember { mutableStateOf(false) }
+
+
+                val db = when(uiState) {
+                    is NoiseUiState.Error -> 0
+                    NoiseUiState.Initial -> 0
+                    is NoiseUiState.Recording -> uiState.dbLevel
+                    is NoiseUiState.Stopped -> uiState.dbLevel
+                }
+
+                NoiseMeterBody(
+                    db = db,
+                    expanded
+                )
+
+                Spacer(Modifier.height(35.dp))
+
                 when (uiState) {
                     NoiseUiState.Initial -> {
-                        // 初期表示時
-                        NoiseMeterBody(
-                            db = 0,
-                            expanded
-                        )
-                        Spacer(Modifier.height(35.dp))
                         StartRecordingButton({
                             startRecording()
                             expanded = false
@@ -137,12 +147,6 @@ fun NoiseMeterContent(
                     }
 
                     is NoiseUiState.Recording -> {
-                        // レコーディング中
-                        NoiseMeterBody(
-                            db = uiState.dbLevel,
-                            expanded
-                        )
-                        Spacer(Modifier.height(35.dp))
                         StopRecordingButton({
                             stopRecording()
                             expanded = true
@@ -150,12 +154,6 @@ fun NoiseMeterContent(
                     }
 
                     is NoiseUiState.Stopped -> {
-                        // 停止中
-                        NoiseMeterBody(
-                            db = uiState.dbLevel,
-                            expanded
-                        )
-                        Spacer(Modifier.height(35.dp))
                         StartRecordingButton({
                             startRecording()
                             expanded = false
@@ -256,7 +254,7 @@ fun NoiseMeterBody(
 
     Spacer(Modifier.height(18.dp))
 
-    DbLevelCard(0, expanded)
+    DbLevelCard(db, expanded)
 }
 
 @Composable
