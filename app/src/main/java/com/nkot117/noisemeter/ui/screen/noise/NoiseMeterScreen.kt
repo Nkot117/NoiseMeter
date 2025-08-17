@@ -57,6 +57,7 @@ import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import com.nkot117.noisemeter.R
 import com.nkot117.noisemeter.ui.common.IconTextButton
+import com.nkot117.noisemeter.ui.common.IconTextOutlinedButton
 import com.nkot117.noisemeter.ui.theme.NoisyBg
 import com.nkot117.noisemeter.ui.theme.NoisyText
 import com.nkot117.noisemeter.ui.theme.NormalBg
@@ -99,13 +100,12 @@ fun NoiseMeterContent(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(vertical = 20.dp)
             .verticalScroll(scrollState)
     ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp),
+                .padding(top = 20.dp, start = 12.dp, end = 12.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         ) {
@@ -165,7 +165,7 @@ fun NoiseMeterContent(
         )
 
         Card(
-            modifier = Modifier.padding(horizontal = 12.dp),
+            modifier = Modifier.padding(bottom = 20.dp, start = 12.dp, end = 12.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         ) {
@@ -528,7 +528,7 @@ fun StartRecordingButton(
 fun StopRecordingButton(
     clickAction: () -> Unit
 ) {
-    IconTextButton(
+    IconTextOutlinedButton(
         buttonText = "測定停止",
         icon = ImageVector.vectorResource(id = R.drawable.ic_measure_stop),
         modifier = Modifier

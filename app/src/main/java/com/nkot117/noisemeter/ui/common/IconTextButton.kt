@@ -1,15 +1,19 @@
 package com.nkot117.noisemeter.ui.common
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -45,16 +49,55 @@ fun IconTextButton(
             tint = Color.Unspecified,
         )
         Spacer(Modifier.width(spacing))
-        Text(text = buttonText)
+        Text(text = buttonText, style = MaterialTheme.typography.labelLarge)
+    }
+}
+
+@Composable
+fun IconTextOutlinedButton(
+    buttonText: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    iconSize: Dp = Dimens.IconSmall,
+    spacing: Dp = Dimens.IconSpacingSmall,
+    contentDescription: String? = buttonText
+) {
+    OutlinedButton(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            modifier = Modifier.size(iconSize),
+            tint = Color.Unspecified
+        )
+        Spacer(Modifier.width(spacing))
+        Text(text = buttonText, style = MaterialTheme.typography.labelLarge)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun IconTextButtonPreview() {
-    IconTextButton(
-        buttonText = "設定",
-        icon = Icons.Default.Settings,
-        onClick = {}
-    )
+fun IconTextButtonsPreview() {
+    MaterialTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            IconTextButton(
+                buttonText = "Filled Button",
+                icon = Icons.Default.Favorite,
+                onClick = {}
+            )
+            IconTextOutlinedButton(
+                buttonText = "Outlined Button",
+                icon = Icons.Default.FavoriteBorder,
+                onClick = {}
+            )
+        }
+    }
 }
