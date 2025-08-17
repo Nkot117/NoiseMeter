@@ -27,10 +27,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -511,12 +508,12 @@ fun StartRecordingButton(
     }
 
     IconTextButton(
-        buttonText= "測定停止",
-        icon = Icons.Default.PlayArrow,
+        buttonText = "測定開始",
+        icon = ImageVector.vectorResource(id = R.drawable.ic_measure_start),
         modifier = Modifier
-            .height(48.dp)
-            .fillMaxWidth(),
-        onClick= {
+            .height(48.dp),
+        iconSize = 48.dp,
+        onClick = {
             if (audioPermissionState?.status == PermissionStatus.Granted) {
                 clickAction()
             } else {
@@ -532,15 +529,15 @@ fun StopRecordingButton(
     clickAction: () -> Unit
 ) {
     IconTextButton(
-        buttonText= "測定停止",
-        icon = Icons.Default.Check,
+        buttonText = "測定停止",
+        icon = ImageVector.vectorResource(id = R.drawable.ic_measure_stop),
         modifier = Modifier
-            .height(48.dp)
-            .fillMaxWidth(),
-    onClick= {
-        clickAction()
-    },
-    contentDescription = "測定停止ボタン"
+            .height(48.dp),
+        iconSize = 48.dp,
+        onClick = {
+            clickAction()
+        },
+        contentDescription = "測定停止ボタン"
     )
 }
 
