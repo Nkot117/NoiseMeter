@@ -8,6 +8,8 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -119,38 +121,45 @@ fun NoiseMeterContent(
                 Spacer(Modifier.height(24.dp))
 
                 Timber.d("Current Ui State: $uiState")
+                var expanded by remember { mutableStateOf(false) }
                 when (uiState) {
                     NoiseUiState.Initial -> {
                         // 初期表示時
                         NoiseMeterBody(
-                            db = 0
+                            db = 0,
+                            expanded
                         )
-                        Spacer(Modifier.height(18.dp))
-                        DbLevelCard(0)
                         Spacer(Modifier.height(35.dp))
-                        StartRecordingButton(startRecording)
+                        StartRecordingButton({
+                            startRecording()
+                            expanded = false
+                        })
                     }
 
                     is NoiseUiState.Recording -> {
                         // レコーディング中
                         NoiseMeterBody(
                             db = uiState.dbLevel,
+                            expanded
                         )
-                        Spacer(Modifier.height(18.dp))
-                        DbLevelCard(uiState.dbLevel)
                         Spacer(Modifier.height(35.dp))
-                        StopRecordingButton(stopRecording)
+                        StopRecordingButton({
+                            stopRecording()
+                            expanded = true
+                        })
                     }
 
                     is NoiseUiState.Stopped -> {
                         // 停止中
                         NoiseMeterBody(
-                            db = uiState.dbLevel
+                            db = uiState.dbLevel,
+                            expanded
                         )
-                        Spacer(Modifier.height(18.dp))
-                        DbLevelCard(uiState.dbLevel)
                         Spacer(Modifier.height(35.dp))
-                        StartRecordingButton(startRecording)
+                        StartRecordingButton({
+                            startRecording()
+                            expanded = false
+                        })
                     }
 
                     is NoiseUiState.Error -> {}
@@ -160,7 +169,7 @@ fun NoiseMeterContent(
 
         Spacer(Modifier.height(24.dp))
 
-        var expanded by remember { mutableStateOf(true) }
+        var expanded by remember { mutableStateOf(false) }
         val arrowRotation by animateFloatAsState(
             targetValue = if (expanded) 180f else 0f,
         )
@@ -231,6 +240,7 @@ fun NoiseMeterContent(
 @Composable
 fun NoiseMeterBody(
     db: Int,
+    expanded: Boolean
 ) {
     val progress = db / 120F
     val animatedProgress by animateFloatAsState(
@@ -243,6 +253,10 @@ fun NoiseMeterBody(
     Spacer(Modifier.height(8.dp))
 
     DbLevelBar(animatedProgress)
+
+    Spacer(Modifier.height(18.dp))
+
+    DbLevelCard(0, expanded)
 }
 
 @Composable
@@ -297,14 +311,15 @@ fun DbLevelBar(
 
 @Composable
 fun DbLevelCard(
-    db: Int
+    db: Int,
+    expanded: Boolean,
 ) {
     val (dbLevel, targetBgColor, targetTextColor) = when (db) {
-        in DbLevel.QUIET.min .. DbLevel.QUIET.max -> Triple(DbLevel.QUIET.label, VeryQuietBg, VeryQuietText)
-        in DbLevel.SOFT.min .. DbLevel.SOFT.max -> Triple(DbLevel.SOFT.label, QuietBg, QuietText)
-        in DbLevel.NORMAL.min .. DbLevel.NORMAL.max -> Triple(DbLevel.NORMAL.label, NormalBg, NormalText)
-        in DbLevel.LOUD.min .. DbLevel.LOUD.max -> Triple(DbLevel.LOUD.label, LoudBg, LoudText)
-        else -> Triple(DbLevel.VERY_LOUD.label, VeryLoudBg, VeryLoudText)
+        in DbLevel.QUIET.min..DbLevel.QUIET.max -> Triple(DbLevel.QUIET, VeryQuietBg, VeryQuietText)
+        in DbLevel.SOFT.min..DbLevel.SOFT.max -> Triple(DbLevel.SOFT, QuietBg, QuietText)
+        in DbLevel.NORMAL.min..DbLevel.NORMAL.max -> Triple(DbLevel.NORMAL, NormalBg, NormalText)
+        in DbLevel.LOUD.min..DbLevel.LOUD.max -> Triple(DbLevel.LOUD, LoudBg, LoudText)
+        else -> Triple(DbLevel.VERY_LOUD, VeryLoudBg, VeryLoudText)
     }
 
     val backgroundColor by animateColorAsState(
@@ -324,8 +339,6 @@ fun DbLevelCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
     ) {
 
-        var expanded by remember { mutableStateOf(false) }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -333,27 +346,29 @@ fun DbLevelCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = dbLevel,
+                text = dbLevel.label,
                 style = MaterialTheme.typography.labelLarge,
                 color = textColor,
             )
 
             AnimatedVisibility(
                 visible = expanded,
-                enter = expandVertically(
+                enter = fadeIn(
+                    animationSpec = tween(durationMillis = 600)
+                ) + expandVertically(
                     expandFrom = Alignment.Top,
-                    animationSpec = tween()
+                    animationSpec = tween(durationMillis = 600)
                 ),
-                exit = shrinkVertically(
+                exit = fadeOut(
+                    animationSpec = tween(durationMillis = 600)
+                ) + shrinkVertically(
                     shrinkTowards = Alignment.Top,
-                    animationSpec = tween()
+                    animationSpec = tween(durationMillis = 600)
                 )
             ) {
-                Text("test")
+                Text(dbLevel.example)
             }
         }
-
-
     }
 }
 
@@ -491,15 +506,15 @@ fun PreviewNoiseMeterContent_Error() {
 fun PreviewDbLevelCard() {
     MaterialTheme {
         Column(modifier = Modifier.fillMaxSize()) {
-            DbLevelCard(db = 10)  // 非常に静か
+            DbLevelCard(db = 10, expanded = true)  // 非常に静か
             Spacer(modifier = Modifier.height(20.dp))
-            DbLevelCard(db = 30)  // 静か
+            DbLevelCard(db = 30, expanded = true)  // 静か
             Spacer(modifier = Modifier.height(20.dp))
-            DbLevelCard(db = 50)  // 普通
+            DbLevelCard(db = 50, expanded = true)  // 普通
             Spacer(modifier = Modifier.height(20.dp))
-            DbLevelCard(db = 70)  // 騒がしい
+            DbLevelCard(db = 70, expanded = true)  // 騒がしい
             Spacer(modifier = Modifier.height(20.dp))
-            DbLevelCard(db = 90)  // 非常に騒がしい
+            DbLevelCard(db = 90, expanded = true)  // 非常に騒がしい
         }
     }
 }
