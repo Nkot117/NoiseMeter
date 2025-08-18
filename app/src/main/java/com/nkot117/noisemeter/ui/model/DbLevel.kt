@@ -1,4 +1,4 @@
-package com.nkot117.noisemeter.model
+package com.nkot117.noisemeter.ui.model
 
 enum class DbLevel(
     val min: Int,
