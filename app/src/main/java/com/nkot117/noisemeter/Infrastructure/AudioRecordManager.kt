@@ -1,4 +1,4 @@
-package com.nkot117.noisemeter.data
+package com.nkot117.noisemeter.Infrastructure
 
 import android.Manifest
 import android.media.AudioFormat

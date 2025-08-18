@@ -4,7 +4,7 @@ import android.Manifest
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nkot117.noisemeter.data.AudioRecordManager
+import com.nkot117.noisemeter.Infrastructure.AudioRecordManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
