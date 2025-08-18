@@ -35,10 +35,10 @@ class NoiseMeterViewModel @Inject constructor(
 
         try {
             recordingJob = viewModelScope.launch(Dispatchers.Default) {
-                getNoiseLevelUseCase().collect { db ->
-                    _uiState.value = NoiseUiState.Recording(dbLevel = db)
-                    correctDbList.add(db)
-                    Timber.d("Current:%s", db)
+                getNoiseLevelUseCase().collect { dbLevel ->
+                    _uiState.value = NoiseUiState.Recording(dbLevel = dbLevel.db)
+                    correctDbList.add(dbLevel.db)
+                    Timber.d("Current:%s", dbLevel.db)
                 }
             }
         } catch (e: Exception) {
@@ -50,7 +50,7 @@ class NoiseMeterViewModel @Inject constructor(
     fun stopRecording() {
         val currentDbLevel = (_uiState.value as? NoiseUiState.Recording)?.dbLevel ?: 0
         val averageDb = averageNoiseLevelUseCase(correctDbList)
-        _uiState.value = NoiseUiState.Stopped(dbLevel = currentDbLevel, averageDb = averageDb)
+        _uiState.value = NoiseUiState.Stopped(dbLevel = currentDbLevel, averageDb = averageDb.db)
         correctDbList = arrayListOf()
         try {
             recordingJob?.cancel()

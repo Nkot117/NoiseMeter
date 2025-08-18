@@ -47,7 +47,7 @@ class AudioRecordManager @Inject constructor() {
                 val amplitude = sqrt(sum / bufferSize).coerceAtLeast(1.0)
                 val db = (20.0 * log10(amplitude)).toInt()
                 emit(db)
-                delay(500)
+                delay(100)
             }
         } catch (e: Exception) {
             Timber.d("Recording Error：%s", e.message)
