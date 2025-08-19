@@ -60,7 +60,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.nkot117.noisemeter.R
 import com.nkot117.noisemeter.ui.common.IconTextButton
 import com.nkot117.noisemeter.ui.common.IconTextOutlinedButton
-import com.nkot117.noisemeter.ui.model.DbLevel
+import com.nkot117.noisemeter.ui.model.DbLevelCategory
 import com.nkot117.noisemeter.ui.theme.LoudBg
 import com.nkot117.noisemeter.ui.theme.LoudText
 import com.nkot117.noisemeter.ui.theme.NormalBg
@@ -214,17 +214,17 @@ fun NoiseMeterContent(
                     )
                 ) {
                     Column {
-                        DbLevel.entries.forEach { dbLeve ->
+                        DbLevelCategory.entries.forEach { dbLeve ->
                             val (textColor, icon) = when (dbLeve) {
-                                DbLevel.QUIET -> Pair(VeryQuietText, R.drawable.ic_quit)
-                                DbLevel.SOFT -> Pair(QuietText, R.drawable.ic_soft)
-                                DbLevel.NORMAL -> Pair(NormalText, R.drawable.ic_normal)
-                                DbLevel.LOUD -> Pair(LoudText, R.drawable.ic_loud)
-                                DbLevel.VERY_LOUD -> Pair(VeryLoudText, R.drawable.ic_very_loud)
+                                DbLevelCategory.QUIET -> Pair(VeryQuietText, R.drawable.ic_quit)
+                                DbLevelCategory.SOFT -> Pair(QuietText, R.drawable.ic_soft)
+                                DbLevelCategory.NORMAL -> Pair(NormalText, R.drawable.ic_normal)
+                                DbLevelCategory.LOUD -> Pair(LoudText, R.drawable.ic_loud)
+                                DbLevelCategory.VERY_LOUD -> Pair(VeryLoudText, R.drawable.ic_very_loud)
                             }
 
                             DbLevelRow(
-                                dbLevel = dbLeve,
+                                dbLevelCategory = dbLeve,
                                 icon = ImageVector.vectorResource(icon),
                                 textColor = textColor,
                             )
@@ -316,11 +316,11 @@ fun DbLevelCard(
     expanded: Boolean,
 ) {
     val (dbLevel, targetBgColor, targetTextColor) = when (db) {
-        in DbLevel.QUIET.min..DbLevel.QUIET.max -> Triple(DbLevel.QUIET, VeryQuietBg, VeryQuietText)
-        in DbLevel.SOFT.min..DbLevel.SOFT.max -> Triple(DbLevel.SOFT, QuietBg, QuietText)
-        in DbLevel.NORMAL.min..DbLevel.NORMAL.max -> Triple(DbLevel.NORMAL, NormalBg, NormalText)
-        in DbLevel.LOUD.min..DbLevel.LOUD.max -> Triple(DbLevel.LOUD, LoudBg, LoudText)
-        else -> Triple(DbLevel.VERY_LOUD, VeryLoudBg, VeryLoudText)
+        in DbLevelCategory.QUIET.min..DbLevelCategory.QUIET.max -> Triple(DbLevelCategory.QUIET, VeryQuietBg, VeryQuietText)
+        in DbLevelCategory.SOFT.min..DbLevelCategory.SOFT.max -> Triple(DbLevelCategory.SOFT, QuietBg, QuietText)
+        in DbLevelCategory.NORMAL.min..DbLevelCategory.NORMAL.max -> Triple(DbLevelCategory.NORMAL, NormalBg, NormalText)
+        in DbLevelCategory.LOUD.min..DbLevelCategory.LOUD.max -> Triple(DbLevelCategory.LOUD, LoudBg, LoudText)
+        else -> Triple(DbLevelCategory.VERY_LOUD, VeryLoudBg, VeryLoudText)
     }
 
     val backgroundColor by animateColorAsState(
@@ -425,7 +425,7 @@ fun StopRecordingButton(
 
 @Composable
 fun DbLevelRow(
-    dbLevel: DbLevel,
+    dbLevelCategory: DbLevelCategory,
     icon: ImageVector,
     textColor: Color = Color.Black,
 ) {
@@ -438,7 +438,7 @@ fun DbLevelRow(
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = dbLevel.label,
+            contentDescription = dbLevelCategory.label,
             tint = Color.Unspecified,
             modifier = Modifier.size(56.dp)
         )
@@ -447,18 +447,18 @@ fun DbLevelRow(
             modifier = Modifier.width(200.dp)
         ) {
             Text(
-                text = "${dbLevel.min} ~ ${dbLevel.max} dB",
+                text = "${dbLevelCategory.min} ~ ${dbLevelCategory.max} dB",
                 style = MaterialTheme.typography.labelLarge
             )
 
             Text(
-                text = dbLevel.example,
+                text = dbLevelCategory.example,
                 style = MaterialTheme.typography.labelMedium
             )
         }
 
         Text(
-            text = dbLevel.label,
+            text = dbLevelCategory.label,
             color = textColor,
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.width(64.dp)
@@ -528,7 +528,7 @@ fun PreviewDbLevelCard() {
 @Composable
 fun PreviewDbLevelRow() {
     DbLevelRow(
-        dbLevel = DbLevel.VERY_LOUD,
+        dbLevelCategory = DbLevelCategory.VERY_LOUD,
         icon = ImageVector.vectorResource(R.drawable.ic_very_loud),
         textColor = VeryLoudText,
     )

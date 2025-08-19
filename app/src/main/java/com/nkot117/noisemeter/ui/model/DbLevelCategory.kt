@@ -1,6 +1,6 @@
 package com.nkot117.noisemeter.ui.model
 
-enum class DbLevel(
+enum class DbLevelCategory(
     val min: Int,
     val max: Int,
     val label: String,
