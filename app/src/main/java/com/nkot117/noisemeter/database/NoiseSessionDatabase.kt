@@ -10,6 +10,6 @@ import com.nkot117.noisemeter.database.model.NoiseSessionEntity
     version = 1,
     exportSchema = true
 )
-abstract class NoiseDatabase : RoomDatabase() {
+abstract class NoiseSessionDatabase : RoomDatabase() {
     abstract fun noiseSessionDao(): NoiseSessionDao
 }

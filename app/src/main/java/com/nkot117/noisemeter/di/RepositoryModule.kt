@@ -1,6 +1,8 @@
 package com.nkot117.noisemeter.di
 
+import com.nkot117.noisemeter.data.repository.NoiseHistoryRepositoryImpl
 import com.nkot117.noisemeter.data.repository.NoiseRepositoryImpl
+import com.nkot117.noisemeter.domain.repository.NoiseHistoryRepository
 import com.nkot117.noisemeter.domain.repository.NoiseRepository
 import dagger.Binds
 import dagger.Module
@@ -11,10 +13,15 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
-
     @Binds
     @Singleton
     abstract fun bindNoiseRepository(
         impl: NoiseRepositoryImpl
     ): NoiseRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNoiseHistoryRepository(
+        impl: NoiseHistoryRepositoryImpl
+    ): NoiseHistoryRepository
 }
