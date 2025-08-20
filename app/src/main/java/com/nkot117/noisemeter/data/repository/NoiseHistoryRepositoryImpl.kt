@@ -31,7 +31,6 @@ class NoiseHistoryRepositoryImpl @Inject constructor(
 
     private fun NoiseSession.toEntity(): NoiseSessionEntity {
         return NoiseSessionEntity(
-            id = id,
             startAt = startAt.toEpochMilli(),
             endAt = endAt.toEpochMilli(),
             averageDb = averageDb,

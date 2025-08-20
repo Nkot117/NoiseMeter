@@ -128,7 +128,10 @@ fun NoiseMeterContent(
                     is NoiseUiState.Error -> Pair(0, 0)
                     NoiseUiState.Initial -> Pair(0, 0)
                     is NoiseUiState.Recording -> Pair(uiState.dbLevel, 0)
-                    is NoiseUiState.Stopped -> Pair(uiState.dbLevel, uiState.averageDb)
+                    is NoiseUiState.Stopped -> Pair(
+                        uiState.sessionUiData.currentDb,
+                        uiState.sessionUiData.averageDb
+                    )
                 }
 
                 NoiseMeterBody(
@@ -220,7 +223,10 @@ fun NoiseMeterContent(
                                 DbLevelCategory.SOFT -> Pair(QuietText, R.drawable.ic_soft)
                                 DbLevelCategory.NORMAL -> Pair(NormalText, R.drawable.ic_normal)
                                 DbLevelCategory.LOUD -> Pair(LoudText, R.drawable.ic_loud)
-                                DbLevelCategory.VERY_LOUD -> Pair(VeryLoudText, R.drawable.ic_very_loud)
+                                DbLevelCategory.VERY_LOUD -> Pair(
+                                    VeryLoudText,
+                                    R.drawable.ic_very_loud
+                                )
                             }
 
                             DbLevelRow(
@@ -316,10 +322,30 @@ fun DbLevelCard(
     expanded: Boolean,
 ) {
     val (dbLevel, targetBgColor, targetTextColor) = when (db) {
-        in DbLevelCategory.QUIET.min..DbLevelCategory.QUIET.max -> Triple(DbLevelCategory.QUIET, VeryQuietBg, VeryQuietText)
-        in DbLevelCategory.SOFT.min..DbLevelCategory.SOFT.max -> Triple(DbLevelCategory.SOFT, QuietBg, QuietText)
-        in DbLevelCategory.NORMAL.min..DbLevelCategory.NORMAL.max -> Triple(DbLevelCategory.NORMAL, NormalBg, NormalText)
-        in DbLevelCategory.LOUD.min..DbLevelCategory.LOUD.max -> Triple(DbLevelCategory.LOUD, LoudBg, LoudText)
+        in DbLevelCategory.QUIET.min..DbLevelCategory.QUIET.max -> Triple(
+            DbLevelCategory.QUIET,
+            VeryQuietBg,
+            VeryQuietText
+        )
+
+        in DbLevelCategory.SOFT.min..DbLevelCategory.SOFT.max -> Triple(
+            DbLevelCategory.SOFT,
+            QuietBg,
+            QuietText
+        )
+
+        in DbLevelCategory.NORMAL.min..DbLevelCategory.NORMAL.max -> Triple(
+            DbLevelCategory.NORMAL,
+            NormalBg,
+            NormalText
+        )
+
+        in DbLevelCategory.LOUD.min..DbLevelCategory.LOUD.max -> Triple(
+            DbLevelCategory.LOUD,
+            LoudBg,
+            LoudText
+        )
+
         else -> Triple(DbLevelCategory.VERY_LOUD, VeryLoudBg, VeryLoudText)
     }
 
@@ -490,7 +516,11 @@ fun PreviewNoiseMeterContent_Recording() {
 @Composable
 fun PreviewNoiseMeterContent_Stopped() {
     NoiseMeterContent(
-        uiState = NoiseUiState.Stopped(dbLevel = 35, averageDb = 20),
+        uiState = NoiseUiState.Stopped(
+            NoiseSessionUiData(
+                10, 15, 20, 30
+            )
+        ),
         startRecording = {},
         stopRecording = {},
     )
