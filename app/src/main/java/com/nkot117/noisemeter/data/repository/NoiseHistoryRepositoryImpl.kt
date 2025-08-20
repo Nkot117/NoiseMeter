@@ -1,6 +1,6 @@
 package com.nkot117.noisemeter.data.repository
 
-import com.nkot117.noisemeter.database.dao.NoiseSessionDao
+import com.nkot117.noisemeter.data.datasource.NoiseSessionLocalDataSource
 import com.nkot117.noisemeter.database.model.NoiseSessionEntity
 import com.nkot117.noisemeter.domain.model.NoiseSession
 import com.nkot117.noisemeter.domain.repository.NoiseHistoryRepository
@@ -10,22 +10,23 @@ import java.time.Instant
 import javax.inject.Inject
 
 class NoiseHistoryRepositoryImpl @Inject constructor(
-    private val dao: NoiseSessionDao
+    private val noiseSessionLocalDataSource: NoiseSessionLocalDataSource
 ) : NoiseHistoryRepository {
     override suspend fun save(session: NoiseSession) {
-        dao.insert(session.toEntity())
+        noiseSessionLocalDataSource.insert(session.toEntity())
     }
 
     override fun getAll(): Flow<List<NoiseSession>> {
-        return dao.getAll().map { entityList -> entityList.map { entity -> entity.toDomain() } }
+        return noiseSessionLocalDataSource.getAll()
+            .map { entityList -> entityList.map { entity -> entity.toDomain() } }
     }
 
     override suspend fun delete(id: Long) {
-        dao.delete(id)
+        noiseSessionLocalDataSource.delete(id)
     }
 
     override suspend fun clear() {
-        dao.clear()
+        noiseSessionLocalDataSource.clear()
     }
 
     private fun NoiseSession.toEntity(): NoiseSessionEntity {

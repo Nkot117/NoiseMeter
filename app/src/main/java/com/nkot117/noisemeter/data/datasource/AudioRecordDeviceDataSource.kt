@@ -15,7 +15,7 @@ import javax.inject.Inject
 import kotlin.math.log10
 import kotlin.math.sqrt
 
-class AudioRecordManager @Inject constructor() {
+class AudioRecordDeviceDataSource @Inject constructor() {
     // AudioRecord
     lateinit var audioRecord: AudioRecord
     private var bufferSize: Int = 0
