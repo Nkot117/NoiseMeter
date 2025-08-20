@@ -9,11 +9,11 @@ import com.nkot117.noisemeter.domain.usecase.CalculateNoiseStatsUseCase
 import com.nkot117.noisemeter.domain.usecase.GetNoiseLevelUseCase
 import com.nkot117.noisemeter.domain.usecase.SaveNoiseSessionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.time.Instant
@@ -25,68 +25,72 @@ class NoiseMeterViewModel @Inject constructor(
     private val calculateNoiseStatsUseCase: CalculateNoiseStatsUseCase,
     private val saveNoiseSessionUseCase: SaveNoiseSessionUseCase
 ) : ViewModel() {
-    // UiState
     private val _uiState = MutableStateFlow<NoiseUiState>(NoiseUiState.Initial)
     val uiState: StateFlow<NoiseUiState> = _uiState.asStateFlow()
-
     private var recordingJob: Job? = null
-    private var correctDbList: ArrayList<Int> = arrayListOf()
-
-    private var startAt: Instant? = null
-    private var endAt: Instant? = null
+    private var samples = mutableListOf<Int>()
+    private var recordingStartAt: Instant? = null
 
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     fun startRecording() {
         Timber.d("Recording Start")
-        _uiState.value = NoiseUiState.Recording(dbLevel = 0)
+        recordingStartAt = Instant.now()
+        _uiState.value = NoiseUiState.Recording(db = 0)
 
-        startAt = Instant.now()
-        try {
-            recordingJob = viewModelScope.launch(Dispatchers.Default) {
-                getNoiseLevelUseCase().collect { dbLevel ->
-                    _uiState.value = NoiseUiState.Recording(dbLevel = dbLevel.db)
-                    correctDbList.add(dbLevel.db)
-                    Timber.d("Current:%s", dbLevel.db)
-                }
+        // 収集開始
+        recordingJob = viewModelScope.launch {
+            getNoiseLevelUseCase().catch { e ->
+                Timber.d("Recording Error：%s", e.message)
+                _uiState.value = NoiseUiState.Error(message = "Error")
+            }.collect { db ->
+                Timber.d("Current:%s", db.db)
+                _uiState.value = NoiseUiState.Recording(db = db.db)
+                samples += db.db
             }
-        } catch (e: Exception) {
-            Timber.d("Recording Error：%s", e.message)
-            _uiState.value = NoiseUiState.Error(message = "Error")
         }
     }
 
     fun stopRecording() {
-        val currentDb = (_uiState.value as? NoiseUiState.Recording)?.dbLevel ?: 0
-        val noiseStats = calculateNoiseStatsUseCase(correctDbList)
-        _uiState.value = NoiseUiState.Stopped(
-            NoiseSessionUiData(
-                currentDb = currentDb,
-                averageDb = noiseStats.averageDb,
-                minDb = noiseStats.minDb,
-                maxDb = noiseStats.maxDb
-            )
-        )
+        Timber.d("Recording Stop")
 
-        endAt = Instant.now()
+        // 収集を終了
+        recordingJob?.cancel()
+        recordingJob = null
 
-        viewModelScope.launch(Dispatchers.Default) {
-            saveNoiseSessionUseCase(
-                NoiseSession(
-                    startAt = startAt!!,
-                    endAt = endAt!!,
-                    averageDb = noiseStats.averageDb,
-                    maxDb = noiseStats.maxDb,
-                    minDb = noiseStats.minDb
+        val lastDb = (_uiState.value as? NoiseUiState.Recording)?.db ?: 0
+
+        // 収集結果の取得・保存
+        val noiseStats = calculateNoiseStatsUseCase(samples)
+
+        viewModelScope.launch {
+            runCatching {
+                saveNoiseSessionUseCase(
+                    NoiseSession(
+                        startAt = recordingStartAt!!,
+                        endAt = Instant.now(),
+                        averageDb = noiseStats.averageDb,
+                        maxDb = noiseStats.maxDb,
+                        minDb = noiseStats.minDb
+                    )
                 )
-            )
+            }.onFailure { e ->
+                Timber.d("Save Error：%s", e.message)
+                _uiState.value = NoiseUiState.Error(message = "Error")
+
+            }.onSuccess {
+                _uiState.value = NoiseUiState.Stopped(
+                    NoiseSessionUiData(
+                        lastDb = lastDb,
+                        averageDb = noiseStats.averageDb,
+                        minDb = noiseStats.minDb,
+                        maxDb = noiseStats.maxDb
+                    )
+                )
+            }
         }
 
-        correctDbList = arrayListOf()
-        try {
-            recordingJob?.cancel()
-            recordingJob = null
-        } catch (e: Exception) {
-            _uiState.value = NoiseUiState.Error(e.message.toString())
-        }
+        // 初期化処理
+        samples.clear()
+        recordingStartAt = null
     }
 }

@@ -4,13 +4,13 @@ import com.nkot117.noisemeter.domain.model.NoiseStats
 import javax.inject.Inject
 
 class CalculateNoiseStatsUseCase @Inject constructor() {
-    operator fun invoke(levels: ArrayList<Int>): NoiseStats {
-        val minDb = levels.min()
-        val maxDb = levels.max()
-        val averageDb = levels.map {
+    operator fun invoke(samples: MutableList<Int>): NoiseStats {
+        val minDb = samples.min()
+        val maxDb = samples.max()
+        val averageDb = samples.map {
             it
         }.average().toInt()
-        
+
         return NoiseStats(
             minDb = minDb,
             maxDb = maxDb,

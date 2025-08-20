@@ -127,9 +127,9 @@ fun NoiseMeterContent(
                 val (db, averageDb) = when (uiState) {
                     is NoiseUiState.Error -> Pair(0, 0)
                     NoiseUiState.Initial -> Pair(0, 0)
-                    is NoiseUiState.Recording -> Pair(uiState.dbLevel, 0)
+                    is NoiseUiState.Recording -> Pair(uiState.db, 0)
                     is NoiseUiState.Stopped -> Pair(
-                        uiState.sessionUiData.currentDb,
+                        uiState.sessionUiData.lastDb,
                         uiState.sessionUiData.averageDb
                     )
                 }
@@ -506,7 +506,7 @@ fun PreviewNoiseMeterContent_Initial() {
 @Composable
 fun PreviewNoiseMeterContent_Recording() {
     NoiseMeterContent(
-        uiState = NoiseUiState.Recording(dbLevel = 60),
+        uiState = NoiseUiState.Recording(db = 60),
         startRecording = {},
         stopRecording = {},
     )
