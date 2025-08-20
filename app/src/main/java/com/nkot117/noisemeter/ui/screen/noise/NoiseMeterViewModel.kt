@@ -25,12 +25,30 @@ class NoiseMeterViewModel @Inject constructor(
     private val calculateNoiseStatsUseCase: CalculateNoiseStatsUseCase,
     private val saveNoiseSessionUseCase: SaveNoiseSessionUseCase
 ) : ViewModel() {
+    /**
+     * UiState
+     */
     private val _uiState = MutableStateFlow<NoiseUiState>(NoiseUiState.Initial)
     val uiState: StateFlow<NoiseUiState> = _uiState.asStateFlow()
+
+    /**
+     * 収集Job
+     */
     private var recordingJob: Job? = null
+
+    /**
+     * 収集中のDBリスト
+     */
     private var samples = mutableListOf<Int>()
+
+    /**
+     * 収集開始時刻(UTC)
+     */
     private var recordingStartAt: Instant? = null
 
+    /**
+     * DBの収集を開始する
+     */
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     fun startRecording() {
         Timber.d("Recording Start")
@@ -50,6 +68,9 @@ class NoiseMeterViewModel @Inject constructor(
         }
     }
 
+    /**
+     * DBの収集を停止する
+     */
     fun stopRecording() {
         Timber.d("Recording Stop")
 
