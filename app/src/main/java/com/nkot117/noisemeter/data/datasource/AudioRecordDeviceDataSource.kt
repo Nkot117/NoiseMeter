@@ -51,8 +51,8 @@ class AudioRecordDeviceDataSource @Inject constructor() {
             }
         } catch (e: Exception) {
             Timber.d("Recording Error：%s", e.message)
+            throw e
         } finally {
-            Timber.d("熊倉 Stop")
             audioRecord.stop()
         }
 

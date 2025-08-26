@@ -2,31 +2,42 @@ package com.nkot117.noisemeter.data.repository
 
 import com.nkot117.noisemeter.data.datasource.NoiseSessionLocalDataSource
 import com.nkot117.noisemeter.database.model.NoiseSessionEntity
+import com.nkot117.noisemeter.di.IoDispatcher
 import com.nkot117.noisemeter.domain.model.NoiseSession
 import com.nkot117.noisemeter.domain.repository.NoiseHistoryRepository
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import javax.inject.Inject
 
 class NoiseHistoryRepositoryImpl @Inject constructor(
-    private val noiseSessionLocalDataSource: NoiseSessionLocalDataSource
+    private val noiseSessionLocalDataSource: NoiseSessionLocalDataSource,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : NoiseHistoryRepository {
     override suspend fun save(session: NoiseSession) {
-        noiseSessionLocalDataSource.insert(session.toEntity())
+        withContext(ioDispatcher) {
+            noiseSessionLocalDataSource.insert(session.toEntity())
+        }
     }
 
     override fun getAll(): Flow<List<NoiseSession>> {
-        return noiseSessionLocalDataSource.getAll()
+        return noiseSessionLocalDataSource.getAll().flowOn(ioDispatcher)
             .map { entityList -> entityList.map { entity -> entity.toDomain() } }
     }
 
     override suspend fun delete(id: Long) {
-        noiseSessionLocalDataSource.delete(id)
+        withContext(ioDispatcher) {
+            noiseSessionLocalDataSource.delete(id)
+        }
     }
 
     override suspend fun clear() {
-        noiseSessionLocalDataSource.clear()
+        withContext(ioDispatcher) {
+            noiseSessionLocalDataSource.clear()
+        }
     }
 
     private fun NoiseSession.toEntity(): NoiseSessionEntity {

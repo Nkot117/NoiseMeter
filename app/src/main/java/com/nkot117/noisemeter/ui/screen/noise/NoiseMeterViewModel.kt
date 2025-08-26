@@ -78,27 +78,27 @@ class NoiseMeterViewModel @Inject constructor(
         recordingJob?.cancel()
         recordingJob = null
 
-        val lastDb = (_uiState.value as? NoiseUiState.Recording)?.db ?: 0
-
         // 収集結果の取得・保存
-        val noiseStats = calculateNoiseStatsUseCase(samples)
-
+        val startAt = recordingStartAt!!
+        val lastDb = (_uiState.value as? NoiseUiState.Recording)?.db ?: 0
         viewModelScope.launch {
             runCatching {
+                val noiseStats = calculateNoiseStatsUseCase(samples.toList())
+
                 saveNoiseSessionUseCase(
                     NoiseSession(
-                        startAt = recordingStartAt!!,
+                        startAt = startAt,
                         endAt = Instant.now(),
                         averageDb = noiseStats.averageDb,
                         maxDb = noiseStats.maxDb,
                         minDb = noiseStats.minDb
                     )
                 )
+                noiseStats
             }.onFailure { e ->
                 Timber.d("Save Error：%s", e.message)
                 _uiState.value = NoiseUiState.Error(message = "Error")
-
-            }.onSuccess {
+            }.onSuccess { noiseStats ->
                 _uiState.value = NoiseUiState.Stopped(
                     NoiseSessionUiData(
                         lastDb = lastDb,
