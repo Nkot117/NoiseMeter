@@ -1,4 +1,4 @@
-package com.nkot117.noisemeter.ui.screen.noise
+package com.nkot117.noisemeter.ui.screen.mater
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -75,14 +75,14 @@ import timber.log.Timber
 
 @SuppressLint("MissingPermission")
 @Composable
-fun NoiseMeterScreen(
-    viewModel: NoiseMeterViewModel = hiltViewModel(),
+fun MeterScreen(
+    viewModel: MeterViewModel = hiltViewModel(),
 ) {
-    Timber.d("NoiseMeterScreen Compose")
+    Timber.d("MeterScreen Compose")
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold { innerPadding ->
-        NoiseMeterContent(
+        MeterContent(
             uiState = uiState,
             startRecording = { viewModel.startRecording() },
             stopRecording = { viewModel.stopRecording() },
@@ -93,8 +93,8 @@ fun NoiseMeterScreen(
 
 
 @Composable
-fun NoiseMeterContent(
-    uiState: NoiseUiState,
+fun MeterContent(
+    uiState: MeterUiState,
     startRecording: () -> Unit,
     stopRecording: () -> Unit,
     modifier: Modifier = Modifier,
@@ -125,16 +125,16 @@ fun NoiseMeterContent(
 
 
                 val (db, averageDb) = when (uiState) {
-                    is NoiseUiState.Error -> Pair(0, 0)
-                    NoiseUiState.Initial -> Pair(0, 0)
-                    is NoiseUiState.Recording -> Pair(uiState.db, 0)
-                    is NoiseUiState.Stopped -> Pair(
+                    is MeterUiState.Error -> Pair(0, 0)
+                    MeterUiState.Initial -> Pair(0, 0)
+                    is MeterUiState.Recording -> Pair(uiState.db, 0)
+                    is MeterUiState.Stopped -> Pair(
                         uiState.sessionUiData.lastDb,
                         uiState.sessionUiData.averageDb
                     )
                 }
 
-                NoiseMeterBody(
+                MeterBody(
                     db = db,
                     averageDb = averageDb,
                     expanded
@@ -143,28 +143,28 @@ fun NoiseMeterContent(
                 Spacer(Modifier.height(35.dp))
 
                 when (uiState) {
-                    NoiseUiState.Initial -> {
+                    MeterUiState.Initial -> {
                         StartRecordingButton({
                             startRecording()
                             expanded = false
                         })
                     }
 
-                    is NoiseUiState.Recording -> {
+                    is MeterUiState.Recording -> {
                         StopRecordingButton({
                             stopRecording()
                             expanded = true
                         })
                     }
 
-                    is NoiseUiState.Stopped -> {
+                    is MeterUiState.Stopped -> {
                         StartRecordingButton({
                             startRecording()
                             expanded = false
                         })
                     }
 
-                    is NoiseUiState.Error -> {}
+                    is MeterUiState.Error -> {}
                 }
             }
         }
@@ -243,7 +243,7 @@ fun NoiseMeterContent(
 }
 
 @Composable
-fun NoiseMeterBody(
+fun MeterBody(
     db: Int,
     averageDb: Int,
     expanded: Boolean
@@ -494,9 +494,9 @@ fun DbLevelRow(
 
 @Preview(showBackground = true, name = "Initial State")
 @Composable
-fun PreviewNoiseMeterContent_Initial() {
-    NoiseMeterContent(
-        uiState = NoiseUiState.Initial,
+fun PreviewMeterContent_Initial() {
+    MeterContent(
+        uiState = MeterUiState.Initial,
         startRecording = {},
         stopRecording = {},
     )
@@ -504,9 +504,9 @@ fun PreviewNoiseMeterContent_Initial() {
 
 @Preview(showBackground = true, name = "Recording State")
 @Composable
-fun PreviewNoiseMeterContent_Recording() {
-    NoiseMeterContent(
-        uiState = NoiseUiState.Recording(db = 60),
+fun PreviewMeterContent_Recording() {
+    MeterContent(
+        uiState = MeterUiState.Recording(db = 60),
         startRecording = {},
         stopRecording = {},
     )
@@ -514,10 +514,10 @@ fun PreviewNoiseMeterContent_Recording() {
 
 @Preview(showBackground = true, name = "Stopped State")
 @Composable
-fun PreviewNoiseMeterContent_Stopped() {
-    NoiseMeterContent(
-        uiState = NoiseUiState.Stopped(
-            NoiseSessionUiData(
+fun PreviewMeterContent_Stopped() {
+    MeterContent(
+        uiState = MeterUiState.Stopped(
+            MeterSessionUiData(
                 10, 15, 20, 30
             )
         ),
@@ -528,9 +528,9 @@ fun PreviewNoiseMeterContent_Stopped() {
 
 @Preview(showBackground = true, name = "Error State")
 @Composable
-fun PreviewNoiseMeterContent_Error() {
-    NoiseMeterContent(
-        uiState = NoiseUiState.Error(message = "録音エラー"),
+fun PreviewMeterContent_Error() {
+    MeterContent(
+        uiState = MeterUiState.Error(message = "録音エラー"),
         startRecording = {},
         stopRecording = {},
     )

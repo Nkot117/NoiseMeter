@@ -1,4 +1,4 @@
-package com.nkot117.noisemeter.ui.screen.noise
+package com.nkot117.noisemeter.ui.screen.mater
 
 import android.Manifest
 import androidx.annotation.RequiresPermission
@@ -20,7 +20,7 @@ import java.time.Instant
 import javax.inject.Inject
 
 @HiltViewModel
-class NoiseMeterViewModel @Inject constructor(
+class MeterViewModel @Inject constructor(
     private val getNoiseLevelUseCase: GetNoiseLevelUseCase,
     private val calculateNoiseStatsUseCase: CalculateNoiseStatsUseCase,
     private val saveNoiseSessionUseCase: SaveNoiseSessionUseCase
@@ -28,8 +28,8 @@ class NoiseMeterViewModel @Inject constructor(
     /**
      * UiState
      */
-    private val _uiState = MutableStateFlow<NoiseUiState>(NoiseUiState.Initial)
-    val uiState: StateFlow<NoiseUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<MeterUiState>(MeterUiState.Initial)
+    val uiState: StateFlow<MeterUiState> = _uiState.asStateFlow()
 
     /**
      * 収集Job
@@ -53,16 +53,16 @@ class NoiseMeterViewModel @Inject constructor(
     fun startRecording() {
         Timber.d("Recording Start")
         recordingStartAt = Instant.now()
-        _uiState.value = NoiseUiState.Recording(db = 0)
+        _uiState.value = MeterUiState.Recording(db = 0)
 
         // 収集開始
         recordingJob = viewModelScope.launch {
             getNoiseLevelUseCase().catch { e ->
                 Timber.d("Recording Error：%s", e.message)
-                _uiState.value = NoiseUiState.Error(message = "Error")
+                _uiState.value = MeterUiState.Error(message = "Error")
             }.collect { db ->
                 Timber.d("Current:%s", db.db)
-                _uiState.value = NoiseUiState.Recording(db = db.db)
+                _uiState.value = MeterUiState.Recording(db = db.db)
                 samples += db.db
             }
         }
@@ -80,7 +80,7 @@ class NoiseMeterViewModel @Inject constructor(
 
         // 収集結果の取得・保存
         val startAt = recordingStartAt!!
-        val lastDb = (_uiState.value as? NoiseUiState.Recording)?.db ?: 0
+        val lastDb = (_uiState.value as? MeterUiState.Recording)?.db ?: 0
         viewModelScope.launch {
             runCatching {
                 val noiseStats = calculateNoiseStatsUseCase(samples.toList())
@@ -97,10 +97,10 @@ class NoiseMeterViewModel @Inject constructor(
                 noiseStats
             }.onFailure { e ->
                 Timber.d("Save Error：%s", e.message)
-                _uiState.value = NoiseUiState.Error(message = "Error")
+                _uiState.value = MeterUiState.Error(message = "Error")
             }.onSuccess { noiseStats ->
-                _uiState.value = NoiseUiState.Stopped(
-                    NoiseSessionUiData(
+                _uiState.value = MeterUiState.Stopped(
+                    MeterSessionUiData(
                         lastDb = lastDb,
                         averageDb = noiseStats.averageDb,
                         minDb = noiseStats.minDb,
