@@ -34,7 +34,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -76,19 +75,17 @@ import timber.log.Timber
 @SuppressLint("MissingPermission")
 @Composable
 fun MeterScreen(
+    modifier: Modifier = Modifier,
     viewModel: MeterViewModel = hiltViewModel(),
 ) {
     Timber.d("MeterScreen Compose")
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    Scaffold { innerPadding ->
-        MeterContent(
-            uiState = uiState,
-            startRecording = { viewModel.startRecording() },
-            stopRecording = { viewModel.stopRecording() },
-            modifier = Modifier.padding(innerPadding),
-        )
-    }
+    MeterContent(
+        uiState = uiState,
+        startRecording = { viewModel.startRecording() },
+        stopRecording = { viewModel.stopRecording() },
+        modifier = modifier
+    )
 }
 
 
