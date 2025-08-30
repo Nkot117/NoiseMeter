@@ -67,6 +67,8 @@ import com.nkot117.noisemeter.ui.theme.LoudBg
 import com.nkot117.noisemeter.ui.theme.LoudText
 import com.nkot117.noisemeter.ui.theme.NormalBg
 import com.nkot117.noisemeter.ui.theme.NormalText
+import com.nkot117.noisemeter.ui.theme.NotMeasuredBg
+import com.nkot117.noisemeter.ui.theme.NotMeasuredText
 import com.nkot117.noisemeter.ui.theme.QuietBg
 import com.nkot117.noisemeter.ui.theme.QuietText
 import com.nkot117.noisemeter.ui.theme.VeryLoudBg
@@ -145,7 +147,8 @@ fun MeterContent(
                 MeterBody(
                     db = db,
                     averageDb = averageDb,
-                    expanded
+                    expanded = expanded,
+                    uiState = uiState
                 )
 
                 Spacer(Modifier.height(35.dp))
@@ -254,7 +257,8 @@ fun MeterContent(
 fun MeterBody(
     db: Int,
     averageDb: Int,
-    expanded: Boolean
+    expanded: Boolean,
+    uiState: MeterUiState
 ) {
     val progress = db / 120F
     val animatedProgress by animateFloatAsState(
@@ -270,7 +274,11 @@ fun MeterBody(
 
     Spacer(Modifier.height(18.dp))
 
-    DbLevelCard(db = db, averageDb = averageDb, expanded = expanded)
+    if (uiState is MeterUiState.Initial) {
+        InitialDbLevelCard()
+    } else {
+        DbLevelCard(db = db, averageDb = averageDb, expanded = expanded)
+    }
 }
 
 @Composable
@@ -407,6 +415,29 @@ fun DbLevelCard(
                     Text(dbLevel.example)
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun InitialDbLevelCard() {
+    Card(
+        modifier = Modifier.fillMaxSize(),
+        colors = CardDefaults.cardColors(containerColor = NotMeasuredBg),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+    ) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "計測を開始してください",
+                style = MaterialTheme.typography.labelLarge,
+                color = NotMeasuredText,
+            )
         }
     }
 }

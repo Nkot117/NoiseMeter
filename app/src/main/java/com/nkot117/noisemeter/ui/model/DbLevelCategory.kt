@@ -6,9 +6,9 @@ enum class DbLevelCategory(
     val label: String,
     val example: String
 ) {
-    QUIET(0, 20, "非常に静か", "深夜の住宅街、防音室"),
+    QUIET(1, 20, "非常に静か", "深夜の住宅街、防音室"),
 
-    SOFT(0, 40, "静か", "静かなカフェ、図書室"),
+    SOFT(21, 40, "静か", "静かなカフェ、図書室"),
 
     NORMAL(41, 60, "普通", "日常会話、静かな街中、家庭内の生活音"),
 

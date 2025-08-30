@@ -218,6 +218,7 @@ val surfaceContainerDarkHighContrast = Color(0xFF2E3036)
 val surfaceContainerHighDarkHighContrast = Color(0xFF393B41)
 val surfaceContainerHighestDarkHighContrast = Color(0xFF45474C)
 
+
 //  音量評価用カラー
 val VeryQuietBg = Color(0xFFB2DFDB)
 val VeryQuietText = Color(0xFF004D40)
@@ -233,3 +234,7 @@ val LoudText = Color(0xFFE65100)
 
 val VeryLoudBg = Color(0xFFFFCDD2)
 val VeryLoudText = Color(0xFFC62828)
+
+// 計測前カラー
+val NotMeasuredBg = Color(0xFFFAFAFA)
+val NotMeasuredText = Color(0xFF4B5563)
