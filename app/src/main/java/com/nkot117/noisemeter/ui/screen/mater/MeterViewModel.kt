@@ -10,14 +10,17 @@ import com.nkot117.noisemeter.domain.usecase.GetNoiseLevelUseCase
 import com.nkot117.noisemeter.domain.usecase.SaveNoiseSessionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.time.Instant
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class MeterViewModel @Inject constructor(
@@ -30,6 +33,12 @@ class MeterViewModel @Inject constructor(
      */
     private val _uiState = MutableStateFlow<MeterUiState>(MeterUiState.Initial)
     val uiState: StateFlow<MeterUiState> = _uiState.asStateFlow()
+
+    /**
+     * Toast表示イベント
+     */
+    private val _toastEvent = MutableSharedFlow<String>()
+    val toastEvent = _toastEvent.asSharedFlow()
 
     /**
      * 収集Job
@@ -57,6 +66,8 @@ class MeterViewModel @Inject constructor(
 
         // 収集開始
         recordingJob = viewModelScope.launch {
+            _toastEvent.emit("測定を開始しました")
+
             getNoiseLevelUseCase().catch { e ->
                 Timber.d("Recording Error：%s", e.message)
                 _uiState.value = MeterUiState.Error(message = "Error")
@@ -81,10 +92,10 @@ class MeterViewModel @Inject constructor(
         // 収集結果の取得・保存
         val startAt = recordingStartAt!!
         val lastDb = (_uiState.value as? MeterUiState.Recording)?.db ?: 0
-        viewModelScope.launch {
-            runCatching {
-                val noiseStats = calculateNoiseStatsUseCase(samples.toList())
 
+        viewModelScope.launch {
+            try {
+                val noiseStats = calculateNoiseStatsUseCase(samples.toList())
                 saveNoiseSessionUseCase(
                     NoiseSession(
                         startAt = startAt,
@@ -94,11 +105,7 @@ class MeterViewModel @Inject constructor(
                         minDb = noiseStats.minDb
                     )
                 )
-                noiseStats
-            }.onFailure { e ->
-                Timber.d("Save Error：%s", e.message)
-                _uiState.value = MeterUiState.Error(message = "Error")
-            }.onSuccess { noiseStats ->
+
                 _uiState.value = MeterUiState.Stopped(
                     MeterSessionUiData(
                         lastDb = lastDb,
@@ -107,6 +114,14 @@ class MeterViewModel @Inject constructor(
                         maxDb = noiseStats.maxDb
                     )
                 )
+
+                _toastEvent.emit("測定を終了しました")
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                Timber.d("Save Error: %s", e.message)
+                _uiState.value = MeterUiState.Error(message = "Error")
+                _toastEvent.tryEmit("保存に失敗しました")
             }
         }
 
