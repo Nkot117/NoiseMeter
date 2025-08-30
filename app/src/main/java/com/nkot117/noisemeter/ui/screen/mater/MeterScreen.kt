@@ -121,8 +121,8 @@ fun MeterContent(
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         ) {
             Column(
-                modifier = modifier
-                    .padding(horizontal = 20.dp),
+                modifier = Modifier
+                    .padding(vertical = 12.dp, horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(text = "音量メーター", style = MaterialTheme.typography.titleLarge)
@@ -152,24 +152,24 @@ fun MeterContent(
 
                 when (uiState) {
                     MeterUiState.Initial -> {
-                        StartRecordingButton({
+                        StartRecordingButton {
                             startRecording()
                             expanded = false
-                        })
+                        }
                     }
 
                     is MeterUiState.Recording -> {
-                        StopRecordingButton({
+                        StopRecordingButton {
                             stopRecording()
                             expanded = true
-                        })
+                        }
                     }
 
                     is MeterUiState.Stopped -> {
-                        StartRecordingButton({
+                        StartRecordingButton {
                             startRecording()
                             expanded = false
-                        })
+                        }
                     }
 
                     is MeterUiState.Error -> {}
