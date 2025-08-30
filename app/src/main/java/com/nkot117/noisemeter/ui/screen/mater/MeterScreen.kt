@@ -434,7 +434,7 @@ fun InitialDbLevelCard() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "計測を開始してください",
+                text = "測定を開始してください",
                 style = MaterialTheme.typography.labelLarge,
                 color = NotMeasuredText,
             )
