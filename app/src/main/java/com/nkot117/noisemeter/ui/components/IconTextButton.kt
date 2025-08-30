@@ -1,4 +1,4 @@
-package com.nkot117.noisemeter.ui.common
+package com.nkot117.noisemeter.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

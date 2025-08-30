@@ -60,8 +60,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import com.nkot117.noisemeter.R
-import com.nkot117.noisemeter.ui.common.IconTextButton
-import com.nkot117.noisemeter.ui.common.IconTextOutlinedButton
+import com.nkot117.noisemeter.ui.components.IconTextButton
+import com.nkot117.noisemeter.ui.components.IconTextOutlinedButton
 import com.nkot117.noisemeter.ui.model.DbLevelCategory
 import com.nkot117.noisemeter.ui.theme.LoudBg
 import com.nkot117.noisemeter.ui.theme.LoudText
