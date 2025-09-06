@@ -56,6 +56,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -448,6 +453,12 @@ fun InitialDbLevelCard() {
 fun RunningDbLevelCard(
     time: Int,
 ) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.meter))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever
+    )
+
     Card(
         modifier = Modifier.fillMaxSize(),
         colors = CardDefaults.cardColors(containerColor = MeasuringBg),
@@ -463,21 +474,23 @@ fun RunningDbLevelCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Box {
-                    Row {
-                        // TODO: アイコンは後で取り替える
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_home),
-                            contentDescription = "測定中",
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(24.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        LottieAnimation(
+                            composition = composition,
+                            progress = { progress },
+                            modifier = Modifier.size(32.dp)
                         )
 
                         Text(
                             text = "測定中",
                             style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
                             color = MeasuringText,
                             modifier = Modifier.padding(start = 8.dp)
                         )

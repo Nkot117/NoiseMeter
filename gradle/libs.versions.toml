@@ -13,6 +13,7 @@ activityCompose = "1.10.1"
 composeBom = "2025.07.00"
 hiltAndroid = "2.57"
 ksp = "2.2.0-2.0.2"
+lottieCompose = "6.6.7"
 navigationCompose = "2.9.3"
 timber = "5.0.1"
 uiTextGoogleFonts = "1.8.3"
@@ -42,6 +43,7 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 
