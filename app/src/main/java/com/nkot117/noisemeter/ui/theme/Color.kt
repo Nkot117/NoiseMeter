@@ -235,6 +235,10 @@ val LoudText = Color(0xFFE65100)
 val VeryLoudBg = Color(0xFFFFCDD2)
 val VeryLoudText = Color(0xFFC62828)
 
-// 計測前カラー
+// 測定前カラー
 val NotMeasuredBg = Color(0xFFFAFAFA)
 val NotMeasuredText = Color(0xFF4B5563)
+
+// 測定中カラー
+val MeasuringBg = Color(0xFFBBDEFB)
+val MeasuringText = Color(0xFF0D47A1)

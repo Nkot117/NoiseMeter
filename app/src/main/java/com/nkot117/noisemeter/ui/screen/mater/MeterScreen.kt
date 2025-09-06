@@ -65,6 +65,8 @@ import com.nkot117.noisemeter.ui.components.IconTextOutlinedButton
 import com.nkot117.noisemeter.ui.model.DbLevelCategory
 import com.nkot117.noisemeter.ui.theme.LoudBg
 import com.nkot117.noisemeter.ui.theme.LoudText
+import com.nkot117.noisemeter.ui.theme.MeasuringBg
+import com.nkot117.noisemeter.ui.theme.MeasuringText
 import com.nkot117.noisemeter.ui.theme.NormalBg
 import com.nkot117.noisemeter.ui.theme.NormalText
 import com.nkot117.noisemeter.ui.theme.NotMeasuredBg
@@ -258,7 +260,7 @@ fun MeterBody(
     db: Int,
     averageDb: Int,
     expanded: Boolean,
-    uiState: MeterUiState
+    uiState: MeterUiState,
 ) {
     val progress = db / 120F
     val animatedProgress by animateFloatAsState(
@@ -274,16 +276,16 @@ fun MeterBody(
 
     Spacer(Modifier.height(18.dp))
 
-    if (uiState is MeterUiState.Initial) {
-        InitialDbLevelCard()
-    } else {
-        DbLevelCard(db = db, averageDb = averageDb, expanded = expanded)
+    when (uiState) {
+        is MeterUiState.Initial -> InitialDbLevelCard()
+        is MeterUiState.Recording -> RunningDbLevelCard(20)
+        else -> DbLevelCard(db = db, averageDb = averageDb, expanded = expanded)
     }
 }
 
 @Composable
 fun DbLevelDisplay(
-    db: Int
+    db: Int,
 ) {
     Text(
         text = db.toString(),
@@ -298,7 +300,7 @@ fun DbLevelDisplay(
 
 @Composable
 fun DbLevelBar(
-    progress: Float
+    progress: Float,
 ) {
     Box(
         modifier = Modifier
@@ -442,10 +444,67 @@ fun InitialDbLevelCard() {
     }
 }
 
+@Composable
+fun RunningDbLevelCard(
+    time: Int,
+) {
+    Card(
+        modifier = Modifier.fillMaxSize(),
+        colors = CardDefaults.cardColors(containerColor = MeasuringBg),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+
+            ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Box {
+                    Row {
+                        // TODO: アイコンは後で取り替える
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_home),
+                            contentDescription = "測定中",
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(24.dp)
+                        )
+
+                        Text(
+                            text = "測定中",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MeasuringText,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+                }
+                Text(
+                    text = time.toString() + "秒経過",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MeasuringText,
+                    modifier = Modifier.padding(start = 10.dp)
+                )
+
+            }
+
+            Text(
+                text = "音量を測定しています...",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MeasuringText,
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun StartRecordingButton(
-    clickAction: () -> Unit
+    clickAction: () -> Unit,
 ) {
     val isPreview = LocalInspectionMode.current
     val audioPermissionState = if (!isPreview) {
@@ -473,7 +532,7 @@ fun StartRecordingButton(
 
 @Composable
 fun StopRecordingButton(
-    clickAction: () -> Unit
+    clickAction: () -> Unit,
 ) {
     IconTextOutlinedButton(
         buttonText = "測定停止",
