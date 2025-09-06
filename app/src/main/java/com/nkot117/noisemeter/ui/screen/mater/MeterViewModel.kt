@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.time.Duration
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -26,7 +27,7 @@ import kotlin.coroutines.cancellation.CancellationException
 class MeterViewModel @Inject constructor(
     private val getNoiseLevelUseCase: GetNoiseLevelUseCase,
     private val calculateNoiseStatsUseCase: CalculateNoiseStatsUseCase,
-    private val saveNoiseSessionUseCase: SaveNoiseSessionUseCase
+    private val saveNoiseSessionUseCase: SaveNoiseSessionUseCase,
 ) : ViewModel() {
     /**
      * UiState
@@ -56,13 +57,19 @@ class MeterViewModel @Inject constructor(
     private var recordingStartAt: Instant? = null
 
     /**
+     * 収集経過時間
+     */
+    private var elapsedTime = 0L
+
+    /**
      * DBの収集を開始する
      */
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     fun startRecording() {
         Timber.d("Recording Start")
         recordingStartAt = Instant.now()
-        _uiState.value = MeterUiState.Recording(db = 0)
+        elapsedTime = 0L
+        _uiState.value = MeterUiState.Recording(db = 0, elapsedTime = 0L)
 
         // 収集開始
         recordingJob = viewModelScope.launch {
@@ -73,7 +80,8 @@ class MeterViewModel @Inject constructor(
                 _uiState.value = MeterUiState.Error(message = "Error")
             }.collect { db ->
                 Timber.d("Current:%s", db.db)
-                _uiState.value = MeterUiState.Recording(db = db.db)
+                elapsedTime = Duration.between(recordingStartAt, Instant.now()).seconds
+                _uiState.value = MeterUiState.Recording(db = db.db, elapsedTime = elapsedTime)
                 samples += db.db
             }
         }

@@ -283,7 +283,7 @@ fun MeterBody(
 
     when (uiState) {
         is MeterUiState.Initial -> InitialDbLevelCard()
-        is MeterUiState.Recording -> RunningDbLevelCard(20)
+        is MeterUiState.Recording -> RunningDbLevelCard(uiState.elapsedTime)
         else -> DbLevelCard(db = db, averageDb = averageDb, expanded = expanded)
     }
 }
@@ -433,7 +433,6 @@ fun InitialDbLevelCard() {
         colors = CardDefaults.cardColors(containerColor = NotMeasuredBg),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -451,7 +450,7 @@ fun InitialDbLevelCard() {
 
 @Composable
 fun RunningDbLevelCard(
-    time: Int,
+    elapsedTime: Long,
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.meter))
     val progress by animateLottieCompositionAsState(
@@ -497,7 +496,7 @@ fun RunningDbLevelCard(
                     }
                 }
                 Text(
-                    text = time.toString() + "秒経過",
+                    text = elapsedTime.toString() + "秒経過",
                     style = MaterialTheme.typography.labelLarge,
                     color = MeasuringText,
                     modifier = Modifier.padding(start = 10.dp)
@@ -617,7 +616,7 @@ fun PreviewMeterContent_Initial() {
 @Composable
 fun PreviewMeterContent_Recording() {
     MeterContent(
-        uiState = MeterUiState.Recording(db = 60),
+        uiState = MeterUiState.Recording(db = 60, elapsedTime = 15L),
         startRecording = {},
         stopRecording = {},
     )

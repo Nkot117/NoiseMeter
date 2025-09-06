@@ -2,7 +2,7 @@ package com.nkot117.noisemeter.ui.screen.mater
 
 sealed class MeterUiState {
     object Initial : MeterUiState()
-    data class Recording(val db: Int) : MeterUiState()
+    data class Recording(val db: Int, val elapsedTime: Long) : MeterUiState()
     data class Stopped(val sessionUiData: MeterSessionUiData) : MeterUiState()
     data class Error(val message: String) : MeterUiState()
 }
